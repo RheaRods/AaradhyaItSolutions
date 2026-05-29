@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react'
+import { loginAdmin, saveToken } from '../../services/admin/authService'
 
 const AdminLogin = () => {
   const navigate = useNavigate()
@@ -15,20 +16,25 @@ const AdminLogin = () => {
     setError('')
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!form.username || !form.password) {
       setError('Please enter both username and password.')
       return
     }
     setLoading(true)
-    setTimeout(() => {
-      if (form.username === 'admin' && form.password === 'admin123') {
+    try {
+      const data = await loginAdmin(form.username, form.password)
+      if (data.token) {
+        saveToken(data.token)
         navigate('/admin')
       } else {
-        setError('Invalid username or password.')
-        setLoading(false)
+        setError(data.message || 'Invalid username or password.')
       }
-    }, 1000)
+    } catch (err) {
+      setError('Server error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -126,7 +132,6 @@ const AdminLogin = () => {
             Restricted Access — Authorized Personnel Only
           </p>
           <p className="text-xs text-gray-400">© 2026 Aaradhya IT Solutions</p>
-          <p className="text-xs text-gray-300 mt-2">Demo: admin / admin123</p>
         </div>
       </div>
     </div>
