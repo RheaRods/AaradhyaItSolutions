@@ -199,25 +199,7 @@ const Home = () => {
             <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Reviews</p>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">What Our Clients Say</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                <div className="flex items-center gap-1 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-5">"{t.review}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">{t.initials}</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 text-sm">{t.name}</div>
-                    <div className="text-xs text-gray-500">{t.business}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className="elfsight-app-49367418-ffda-40bc-b3b2-dac7f5616d04" data-elfsight-app-lazy></div>
         </div>
       </section>
 
