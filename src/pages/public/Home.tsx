@@ -11,11 +11,6 @@ const services = [
   { icon: '🛠️', title: 'AMC & Support', description: 'Annual maintenance & 24/7 technical support.' },
 ]
 
-const testimonials = [
-  { name: 'Rahul S.', business: 'Retail Shop, Panaji', review: 'Aaradhya IT completely transformed our billing process. The local support in Goa is outstanding.', rating: 5, initials: 'RS' },
-  { name: 'Priya M.', business: 'Pharmacy, Margao', review: 'Best pharmacy billing software in Goa. Handles expiry dates and GST filings perfectly.', rating: 5, initials: 'PM' },
-  { name: 'Mohan T.', business: 'Hardware Shop, Ponda', review: 'Exceptional service. They implemented a robust inventory system for my shop.', rating: 5, initials: 'MT' },
-]
 
 const StatCard = ({ value, label, suffix = '' }: { value: number, label: string, suffix?: string }) => {
   const [count, setCount] = useState(0)

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageCircle, Phone, Star, Users, Clock, Shield, Award } from 'lucide-react'
+import { MessageCircle, Phone, Users, Clock, Shield, Award } from 'lucide-react'
 import { getStats } from '../../services/public/statsService'
 
 // Animated counter hook
@@ -51,13 +51,6 @@ const team = [
   { name: 'Rajesh Naik', role: 'Founder & CEO', initials: 'RN', desc: 'Over 15 years in enterprise IT solutions across Goa and Maharashtra.' },
   { name: 'Sneha Dessai', role: 'Head of Operations', initials: 'SD', desc: 'Expert in retail ERP deployments and client onboarding.' },
   { name: 'Arun Prabhu', role: 'Lead Technical Engineer', initials: 'AP', desc: 'Hardware specialist with deep expertise in POS and networking.' },
-]
-
-const testimonials = [
-  { name: 'Rahul S.', business: 'Retail Shop, Panaji', review: 'Aaradhya IT completely transformed our billing process. The local support in Goa is outstanding.', rating: 5, initials: 'RS' },
-  { name: 'Priya M.', business: 'Pharmacy, Margao', review: 'Best pharmacy billing software in Goa. Handles expiry dates and GST filings perfectly.', rating: 5, initials: 'PM' },
-  { name: 'Suresh K.', business: 'FMCG Distributor, Vasco', review: 'Good software overall. The technical team helped us migrate all our old data efficiently.', rating: 4, initials: 'SK' },
-  { name: 'Anita D.', business: 'Retail Shop, Mapusa', review: 'Very professional team. They provided onsite training for all my staff.', rating: 5, initials: 'AD' },
 ]
 
 const About = () => {
