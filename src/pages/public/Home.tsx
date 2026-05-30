@@ -4,26 +4,6 @@ import { ArrowRight, MessageCircle, Phone, Shield, Clock, Users, Package, Star, 
 import { getStats } from '../../services/public/statsService'
 import { getProducts } from '../../services/public/productsService'
 
-// Animated counter hook
-const useCounter = (target: number, duration: number = 2000) => {
-  const [count, setCount] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!target) return
-    let start = 0
-    const step = target / (duration / 16)
-    const timer = setInterval(() => {
-      start += step
-      if (start >= target) { setCount(target); clearInterval(timer) }
-      else setCount(Math.floor(start))
-    }, 16)
-    return () => clearInterval(timer)
-  }, [target, duration])
-
-  return { count, ref }
-}
-
 const services = [
   { icon: '🖥️', title: 'ERP & Billing Software', description: 'For retail, FMCG & pharma businesses across Goa.' },
   { icon: '🖨️', title: 'Barcode & Label Printers', description: 'Fast, reliable hardware for high-volume environments.' },
@@ -39,7 +19,38 @@ const testimonials = [
 
 // Stat card with animated counter
 const StatCard = ({ value, label, suffix = '' }: { value: number, label: string, suffix?: string }) => {
-  const { count, ref } = useCounter(value)
+  const [count, setCount] = useState(0)
+  const [hasAnimated, setHasAnimated] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!value) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true)
+          let start = 0
+          const duration = 2000
+          const step = value / (duration / 16)
+          const timer = setInterval(() => {
+            start += step
+            if (start >= value) {
+              setCount(value)
+              clearInterval(timer)
+            } else {
+              setCount(Math.floor(start))
+            }
+          }, 16)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [value, hasAnimated])
+
   return (
     <div ref={ref} className="text-center">
       <div className="text-2xl md:text-3xl font-bold text-white">
