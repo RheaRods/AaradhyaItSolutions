@@ -83,7 +83,7 @@ const ProductDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2">
 
             {/* Product Image */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 h-64 lg:h-auto flex items-center justify-center p-12">
+            <div className="bg-linear-to-br from-blue-50 to-indigo-100 h-64 lg:h-auto flex items-center justify-center p-12">
               <div className="w-32 h-32 bg-blue-600 rounded-3xl flex items-center justify-center shadow-2xl">
                 <Package size={56} className="text-white" />
               </div>
@@ -114,7 +114,7 @@ const ProductDetail = () => {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                
+                <a
                   href={`https://wa.me/919876543210?text=Hi, I'm interested in ${product.name} (${product.id}). Please share more details.`}
                   target="_blank"
                   rel="noreferrer"
@@ -123,7 +123,7 @@ const ProductDetail = () => {
                   <MessageCircle size={18} />
                   Enquire on WhatsApp
                 </a>
-                
+                <a
                   href="tel:+919876543210"
                   className="flex items-center justify-center gap-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-xl transition-colors"
                 >
@@ -191,7 +191,7 @@ const ProductDetail = () => {
                   to={`/products/${p.id}`}
                   className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 h-36 flex items-center justify-center">
+                  <div className="bg-linear-to-br from-blue-50 to-indigo-50 h-36 flex items-center justify-center">
                     <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                       <Package size={22} className="text-white" />
                     </div>

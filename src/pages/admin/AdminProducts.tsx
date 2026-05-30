@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2, Package, X, Check, ChevronDown, Bell, User, LayoutGrid, List } from 'lucide-react'
-import { getProducts, addProduct, deleteProduct, deleteProducts } from '../../services/admin/productsService'
+import { getProducts, addProduct, deleteProduct, deleteProducts } from '../../services/admin/productService'
 
 const emptyForm = {
   name: '',

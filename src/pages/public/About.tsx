@@ -79,7 +79,7 @@ const About = () => {
     <div className="bg-white">
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white py-20">
+      <section className="bg-linear-to-br from-blue-950 via-blue-900 to-blue-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <p className="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-3">About Us</p>
@@ -253,7 +253,7 @@ const About = () => {
             Get in touch with our team today for a free consultation.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            
+            <a
               href="https://wa.me/919876543210"
               target="_blank"
               rel="noreferrer"

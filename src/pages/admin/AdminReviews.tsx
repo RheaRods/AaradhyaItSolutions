@@ -26,7 +26,7 @@ const AdminReviews = () => {
       </div>
 
       {/* Summary Card */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white mb-8">
+      <div className="bg-linear-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white mb-8">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-blue-200 text-sm mb-1">Overall Rating</p>

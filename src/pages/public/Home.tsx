@@ -85,7 +85,7 @@ const Home = () => {
     <div className="bg-white">
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white overflow-hidden">
+      <section className="relative bg-linear-to-br from-blue-950 via-blue-900 to-blue-800 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-400 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
@@ -112,7 +112,7 @@ const Home = () => {
               >
                 Browse Products <ArrowRight size={18} />
               </Link>
-              
+              <a
                 href="https://wa.me/919876543210"
                 target="_blank"
                 rel="noreferrer"
@@ -193,7 +193,7 @@ const Home = () => {
                 to={`/products/${product.id}`}
                 className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
               >
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 h-40 flex items-center justify-center">
+                <div className="bg-linear-to-br from-blue-50 to-indigo-50 h-40 flex items-center justify-center">
                   <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                     <Package size={28} className="text-white" />
                   </div>
@@ -283,7 +283,7 @@ const Home = () => {
             Talk to our team today and get a free consultation for your IT needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            
+            <a
               href="https://wa.me/919876543210"
               target="_blank"
               rel="noreferrer"
@@ -292,7 +292,7 @@ const Home = () => {
               <MessageCircle size={18} />
               WhatsApp Us
             </a>
-            
+            <a
               href="tel:+919876543210"
               className="inline-flex items-center justify-center gap-2 border-2 border-white text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
             >

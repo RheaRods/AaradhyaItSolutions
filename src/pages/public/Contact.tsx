@@ -33,7 +33,7 @@ const Contact = () => {
     <div className="bg-white">
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white py-20">
+      <section className="bg-linear-to-br from-blue-950 via-blue-900 to-blue-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-3">Get In Touch</p>
@@ -86,7 +86,7 @@ const Contact = () => {
                     href: 'https://maps.google.com/?q=Margao,Goa'
                   },
                 ].map(item => (
-                  
+                  <a
                     key={item.label}
                     href={item.href}
                     target={item.href.startsWith('http') ? '_blank' : undefined}
@@ -219,7 +219,7 @@ const Contact = () => {
                       ) : 'Send Enquiry'}
                     </button>
 
-                    
+                    <a
                       href="https://wa.me/919876543210"
                       target="_blank"
                       rel="noreferrer"
