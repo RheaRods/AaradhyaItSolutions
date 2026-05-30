@@ -110,7 +110,7 @@ const Products = () => {
                 to={`/products/${product.id}`}
                 className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
               >
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 h-44 flex items-center justify-center">
+                <div className="bg-linear-to-br from-blue-50 to-indigo-50 h-44 flex items-center justify-center">
                   <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <Package size={28} className="text-white" />
                   </div>
