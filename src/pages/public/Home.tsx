@@ -7,20 +7,10 @@ import { getProducts } from '../../services/public/productsService'
 // Animated counter hook
 const useCounter = (target: number, duration: number = 2000) => {
   const [count, setCount] = useState(0)
-  const [started, setStarted] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setStarted(true) },
-      { threshold: 0.5 }
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!started || target === 0) return
+    if (!target) return
     let start = 0
     const step = target / (duration / 16)
     const timer = setInterval(() => {
@@ -29,7 +19,7 @@ const useCounter = (target: number, duration: number = 2000) => {
       else setCount(Math.floor(start))
     }, 16)
     return () => clearInterval(timer)
-  }, [started, target, duration])
+  }, [target, duration])
 
   return { count, ref }
 }
