@@ -18,9 +18,12 @@ import AdminReviews from './pages/admin/AdminReviews'
 import PublicLayout from './layouts/PublicLayout'
 import AdminLayout from './layouts/AdminLayout'
 
+// Protected Route
+import ProtectedRoute from './components/admin/ProtectedRoute'
+
 function App() {
   return (
-    <BrowserRouter basename="/AaradhyaItSolutions/">
+    <BrowserRouter basename="/AaradhyaItSolutions">
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
@@ -33,7 +36,11 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route element={<AdminLayout />}>
+        <Route element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/inquiries" element={<AdminInquiries />} />
