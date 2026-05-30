@@ -20,7 +20,7 @@ import AdminLayout from './layouts/AdminLayout'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/AaradhyaItSolutions/">
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
