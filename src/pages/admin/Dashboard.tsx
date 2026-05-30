@@ -1,11 +1,11 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, MoreHorizontal, Bell, Calendar, Edit, Trash2, Megaphone, Download, HeadphonesIcon } from 'lucide-react'
-import { products } from '../../data/products'
-import { inquiries } from '../../data/inquiries'
-import { reviews } from '../../data/reviews'
+import { getDashboardData } from '../../services/admin/dashboardService'
 
 const Dashboard = () => {
-  const avgRating = (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 
   const statusColors: Record<string, string> = {
@@ -15,17 +15,25 @@ const Dashboard = () => {
     Resolved: 'bg-blue-100 text-blue-700',
   }
 
-  const recentInquiries = [
-    { product: 'Enterprise Server Rack', method: 'WhatsApp', time: '12:45 PM', status: 'New' },
-    { product: 'Optical Fiber Kit v2', method: 'Phone Call', time: '10:30 AM', status: 'Seen' },
-    { product: 'Cloud Security Suite', method: 'WhatsApp', time: '09:15 AM', status: 'New' },
-  ]
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getDashboardData()
+        setData(result)
+      } catch (error) {
+        console.error('Dashboard error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
-  const recentProducts = [
-    { name: 'Dell PowerEdge R740', category: 'Hardware', date: 'Apr 24, 2026' },
-    { name: 'Fortinet Security Hub', category: 'Networking', date: 'Apr 22, 2026' },
-    { name: 'Pharmacy Billing Software', category: 'Software', date: 'Apr 20, 2026' },
-  ]
+  if (loading) return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="flex-1 bg-gray-50 min-h-screen">
@@ -43,7 +51,9 @@ const Dashboard = () => {
           </div>
           <div className="relative">
             <Bell size={20} className="text-gray-500" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              {data?.stats?.totalInquiries || 0}
+            </span>
           </div>
         </div>
       </div>
@@ -55,28 +65,28 @@ const Dashboard = () => {
           {[
             {
               label: 'Total Inquiries',
-              value: inquiries.length,
+              value: data?.stats?.totalInquiries || 0,
               sub: '+12% ↑',
               subColor: 'text-green-500',
               border: 'border-l-4 border-green-400'
             },
             {
               label: 'Active Products',
-              value: products.length,
+              value: data?.stats?.totalProducts || 0,
               sub: 'In Stock',
               subColor: 'text-yellow-500',
               border: 'border-l-4 border-yellow-400'
             },
             {
               label: 'Avg. Rating',
-              value: avgRating,
+              value: data?.stats?.avgRating || '0.0',
               sub: '★',
               subColor: 'text-yellow-400',
               border: 'border-l-4 border-blue-400'
             },
             {
               label: 'Experience',
-              value: '10+',
+              value: data?.stats?.experience || '10+',
               sub: 'Years',
               subColor: 'text-gray-400',
               border: 'border-l-4 border-gray-300'
@@ -110,7 +120,7 @@ const Dashboard = () => {
                 <span>Time</span>
                 <span>Status</span>
               </div>
-              {recentInquiries.map((inq, i) => (
+              {data?.recentInquiries?.map((inq: any, i: number) => (
                 <div key={i} className="grid grid-cols-4 px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
                   <span className="text-sm text-gray-800 font-medium">{inq.product}</span>
                   <span className="text-sm text-gray-500">{inq.method}</span>
@@ -173,19 +183,18 @@ const Dashboard = () => {
               <span>Category</span>
               <span>Actions</span>
             </div>
-            {recentProducts.map((product, i) => (
+            {data?.recentProducts?.map((product: any, i: number) => (
               <div key={i} className="grid grid-cols-5 px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors items-center">
                 <div className="w-10 h-10 bg-gray-100 rounded-lg" />
                 <div className="col-span-2">
                   <p className="text-sm font-semibold text-gray-900">{product.name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{product.date}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{product.category}</p>
                 </div>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full w-fit ${
-                  product.category === 'Hardware' ? 'bg-blue-100 text-blue-700' :
-                  product.category === 'Software' ? 'bg-green-100 text-green-700' :
-                  'bg-purple-100 text-purple-700'
+                  product.type === 'Hardware' ? 'bg-blue-100 text-blue-700' :
+                  'bg-green-100 text-green-700'
                 }`}>
-                  {product.category.toUpperCase()}
+                  {product.type?.toUpperCase()}
                 </span>
                 <div className="flex items-center gap-2">
                   <button className="text-green-500 hover:text-green-700 transition-colors">
@@ -199,7 +208,6 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   )

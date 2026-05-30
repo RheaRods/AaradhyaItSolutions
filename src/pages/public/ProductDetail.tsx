@@ -1,15 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MessageCircle, Phone, Check, ChevronRight, Package } from 'lucide-react'
-import { products } from '../../data/products'
+import { getProduct } from '../../services/public/productsService'
 
 const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [product, setProduct] = useState<any>(null)
+  const [similar, setSimilar] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'features' | 'specs'>('features')
 
-  const product = products.find(p => p.id === id)
-  const similar = products.filter(p => p.id !== id && (p.category === product?.category || p.type === product?.type)).slice(0, 3)
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        const data = await getProduct(id!)
+        setProduct(data.product)
+        setSimilar(data.similar || [])
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProduct()
+  }, [id])
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   if (!product) {
     return (
@@ -19,7 +41,10 @@ const ProductDetail = () => {
         </div>
         <h2 className="font-bold text-gray-900 text-xl mb-2">Product Not Found</h2>
         <p className="text-gray-500 text-sm mb-6">The product you're looking for doesn't exist.</p>
-        <Link to="/products" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+        <Link
+          to="/products"
+          className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
           Back to Products
         </Link>
       </div>
@@ -89,7 +114,7 @@ const ProductDetail = () => {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <a
+                
                   href={`https://wa.me/919876543210?text=Hi, I'm interested in ${product.name} (${product.id}). Please share more details.`}
                   target="_blank"
                   rel="noreferrer"
@@ -99,7 +124,6 @@ const ProductDetail = () => {
                   Enquire on WhatsApp
                 </a>
                 
-                <a
                   href="tel:+919876543210"
                   className="flex items-center justify-center gap-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-xl transition-colors"
                 >
@@ -132,7 +156,7 @@ const ProductDetail = () => {
           <div className="p-6">
             {activeTab === 'features' && (
               <ul className="space-y-3">
-                {product.features.map((feature, i) => (
+                {product.features?.map((feature: string, i: number) => (
                   <li key={i} className="flex items-start gap-3">
                     <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                       <Check size={12} className="text-green-600" />
@@ -145,7 +169,7 @@ const ProductDetail = () => {
 
             {activeTab === 'specs' && (
               <div className="space-y-4">
-                {Object.entries(product.specs).map(([key, value]) => (
+                {product.specs && Object.entries(product.specs).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                     <span className="text-sm font-medium text-gray-500 capitalize">{key.toUpperCase()}</span>
                     <span className="text-sm font-semibold text-gray-900">{String(value)}</span>
@@ -161,7 +185,7 @@ const ProductDetail = () => {
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-6">Similar Products</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {similar.map(p => (
+              {similar.map((p: any) => (
                 <Link
                   key={p.id}
                   to={`/products/${p.id}`}

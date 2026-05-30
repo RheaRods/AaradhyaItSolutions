@@ -1,12 +1,38 @@
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, MessageCircle, Phone, Shield, Clock, Users, Package, Star, ChevronRight } from 'lucide-react'
+import { getStats } from '../../services/public/statsService'
+import { getProducts } from '../../services/public/productsService'
 
-const stats = [
-  { value: '500+', label: 'Businesses Served' },
-  { value: '10+', label: 'Years Experience' },
-  { value: '50+', label: 'Products' },
-  { value: '24/7', label: 'Customer Support' },
-]
+// Animated counter hook
+const useCounter = (target: number, duration: number = 2000) => {
+  const [count, setCount] = useState(0)
+  const [started, setStarted] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStarted(true) },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!started || target === 0) return
+    let start = 0
+    const step = target / (duration / 16)
+    const timer = setInterval(() => {
+      start += step
+      if (start >= target) { setCount(target); clearInterval(timer) }
+      else setCount(Math.floor(start))
+    }, 16)
+    return () => clearInterval(timer)
+  }, [started, target, duration])
+
+  return { count, ref }
+}
 
 const services = [
   { icon: '🖥️', title: 'ERP & Billing Software', description: 'For retail, FMCG & pharma businesses across Goa.' },
@@ -15,19 +41,45 @@ const services = [
   { icon: '🛠️', title: 'AMC & Support', description: 'Annual maintenance & 24/7 technical support.' },
 ]
 
-const bestSellers = [
-  { id: 'AIT-001', name: 'Pharmacy Billing Software', category: 'Pharma', description: 'GST-ready billing with inventory management for pharmacies.' },
-  { id: 'AIT-006', name: 'OmniPOS Terminal', category: 'Retail', description: 'Unified POS for mobile and desktop retail environments.' },
-  { id: 'AIT-003', name: 'Barcode Label Printer', category: 'Hardware', description: 'Industrial-grade label printing for retail and pharma.' },
-]
-
 const testimonials = [
   { name: 'Rahul S.', business: 'Retail Shop, Panaji', review: 'Aaradhya IT completely transformed our billing process. The local support in Goa is outstanding.', rating: 5, initials: 'RS' },
   { name: 'Priya M.', business: 'Pharmacy, Margao', review: 'Best pharmacy billing software in Goa. Handles expiry dates and GST filings perfectly.', rating: 5, initials: 'PM' },
   { name: 'Mohan T.', business: 'Hardware Shop, Ponda', review: 'Exceptional service. They implemented a robust inventory system for my shop.', rating: 5, initials: 'MT' },
 ]
 
+// Stat card with animated counter
+const StatCard = ({ value, label, suffix = '' }: { value: number, label: string, suffix?: string }) => {
+  const { count, ref } = useCounter(value)
+  return (
+    <div ref={ref} className="text-center">
+      <div className="text-2xl md:text-3xl font-bold text-white">
+        {count}{suffix}
+      </div>
+      <div className="text-sm text-blue-300 mt-1">{label}</div>
+    </div>
+  )
+}
+
 const Home = () => {
+  const [stats, setStats] = useState<any>(null)
+  const [bestSellers, setBestSellers] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsData, productsData] = await Promise.all([
+          getStats(),
+          getProducts()
+        ])
+        setStats(statsData)
+        setBestSellers(productsData?.slice(0, 3) || [])
+      } catch (error) {
+        console.error('Error fetching home data:', error)
+      }
+    }
+    fetchData()
+  }, [])
+
   return (
     <div className="bg-white">
 
@@ -57,11 +109,9 @@ const Home = () => {
                 to="/products"
                 className="inline-flex items-center justify-center gap-2 bg-white text-blue-900 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors duration-200"
               >
-                Browse Products
-                <ArrowRight size={18} />
+                Browse Products <ArrowRight size={18} />
               </Link>
               
-              <a
                 href="https://wa.me/919876543210"
                 target="_blank"
                 rel="noreferrer"
@@ -74,16 +124,28 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Stats Bar */}
+        {/* Animated Stats Bar */}
         <div className="relative border-t border-blue-800/60 bg-blue-900/40 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-blue-300 mt-1">{stat.label}</div>
-                </div>
-              ))}
+              {stats ? (
+                <>
+                  <StatCard value={stats.businessesServed} label="Businesses Served" suffix="+" />
+                  <StatCard value={stats.yearsExperience} label="Years Experience" suffix="+" />
+                  <StatCard value={stats.totalProducts} label="Products" suffix="+" />
+                  <div className="text-center">
+                    <div className="text-2xl md:text-3xl font-bold text-white">24/7</div>
+                    <div className="text-sm text-blue-300 mt-1">Customer Support</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center"><div className="text-2xl font-bold text-white">500+</div><div className="text-sm text-blue-300 mt-1">Businesses Served</div></div>
+                  <div className="text-center"><div className="text-2xl font-bold text-white">10+</div><div className="text-sm text-blue-300 mt-1">Years Experience</div></div>
+                  <div className="text-center"><div className="text-2xl font-bold text-white">50+</div><div className="text-sm text-blue-300 mt-1">Products</div></div>
+                  <div className="text-center"><div className="text-2xl font-bold text-white">24/7</div><div className="text-sm text-blue-300 mt-1">Customer Support</div></div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -101,10 +163,7 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {services.map((service) => (
-              <div
-                key={service.title}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-              >
+              <div key={service.title} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                 <div className="text-3xl mb-4">{service.icon}</div>
                 <h3 className="font-semibold text-gray-900 mb-2">{service.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{service.description}</p>
@@ -114,7 +173,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Best Sellers Section */}
+      {/* Best Sellers */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-12">
@@ -122,10 +181,7 @@ const Home = () => {
               <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Top Picks</p>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Best Sellers</h2>
             </div>
-            <Link
-              to="/products"
-              className="hidden sm:flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
+            <Link to="/products" className="hidden sm:flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm">
               View All <ChevronRight size={16} />
             </Link>
           </div>
@@ -148,21 +204,13 @@ const Home = () => {
                   <h3 className="font-semibold text-gray-900 mt-3 mb-1 group-hover:text-blue-600 transition-colors">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-gray-500">{product.description}</p>
+                  <p className="text-sm text-gray-500">{product.shortDescription}</p>
                   <div className="flex items-center gap-1 mt-4 text-blue-600 text-sm font-medium">
                     View Details <ArrowRight size={14} />
                   </div>
                 </div>
               </Link>
             ))}
-          </div>
-          <div className="text-center mt-8 sm:hidden">
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 border border-blue-600 text-blue-600 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition-colors"
-            >
-              Browse All Products <ArrowRight size={16} />
-            </Link>
           </div>
         </div>
       </section>
@@ -234,7 +282,7 @@ const Home = () => {
             Talk to our team today and get a free consultation for your IT needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
+            
               href="https://wa.me/919876543210"
               target="_blank"
               rel="noreferrer"
@@ -243,7 +291,7 @@ const Home = () => {
               <MessageCircle size={18} />
               WhatsApp Us
             </a>
-            <a
+            
               href="tel:+919876543210"
               className="inline-flex items-center justify-center gap-2 border-2 border-white text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
             >
@@ -253,7 +301,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
     </div>
   )
 }

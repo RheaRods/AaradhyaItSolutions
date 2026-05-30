@@ -1,17 +1,32 @@
 import { useState } from 'react'
 import { Phone, Mail, MapPin, MessageCircle, Clock, CheckCircle } from 'lucide-react'
+import { submitInquiry } from '../../services/public/inquiriesService'
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', business: '', phone: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setError('')
   }
 
-  const handleSubmit = () => {
-    if (!form.name || !form.phone) return
-    setSubmitted(true)
+  const handleSubmit = async () => {
+    if (!form.name || !form.phone) {
+      setError('Name and phone number are required.')
+      return
+    }
+    setLoading(true)
+    try {
+      await submitInquiry(form)
+      setSubmitted(true)
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -40,7 +55,6 @@ const Contact = () => {
             {/* Contact Info */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-8">Reach Us Directly</h2>
-
               <div className="space-y-5 mb-10">
                 {[
                   {
@@ -72,7 +86,7 @@ const Contact = () => {
                     href: 'https://maps.google.com/?q=Margao,Goa'
                   },
                 ].map(item => (
-                  <a
+                  
                     key={item.label}
                     href={item.href}
                     target={item.href.startsWith('http') ? '_blank' : undefined}
@@ -188,14 +202,24 @@ const Contact = () => {
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
+
+                    {error && (
+                      <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+                        {error}
+                      </div>
+                    )}
+
                     <button
                       onClick={handleSubmit}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors duration-200"
+                      disabled={loading}
+                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
                     >
-                      Send Enquiry
+                      {loading ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : 'Send Enquiry'}
                     </button>
+
                     
-                    <a
                       href="https://wa.me/919876543210"
                       target="_blank"
                       rel="noreferrer"

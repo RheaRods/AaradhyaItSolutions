@@ -1,21 +1,40 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, ArrowRight, Package, SlidersHorizontal, X } from 'lucide-react'
-import { products } from '../../data/products'
+import { Search, ArrowRight, Package, X } from 'lucide-react'
+import { getProducts } from '../../services/public/productsService'
 
 const categories = ['All', 'Software', 'Hardware', 'Pharma', 'Retail', 'FMCG']
 
 const Products = () => {
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
-  const [showFilter, setShowFilter] = useState(false)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  const filtered = products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.shortDescription.toLowerCase().includes(search.toLowerCase())
-    const matchCategory = activeCategory === 'All' || p.category === activeCategory || p.type === activeCategory
-    return matchSearch && matchCategory
-  })
+  // Debounce search so we don't call API on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  // Fetch products when search or category changes
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const data = await getProducts(debouncedSearch, activeCategory)
+        setProducts(data || [])
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [debouncedSearch, activeCategory])
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -31,7 +50,7 @@ const Products = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Search + Filter Bar */}
+        {/* Search Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -43,18 +62,14 @@ const Products = () => {
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
                 <X size={16} />
               </button>
             )}
           </div>
-          <button
-            onClick={() => setShowFilter(!showFilter)}
-            className="sm:hidden flex items-center gap-2 border border-gray-200 bg-white px-4 py-2.5 rounded-xl text-sm text-gray-600"
-          >
-            <SlidersHorizontal size={16} />
-            Filter
-          </button>
         </div>
 
         {/* Category Tabs */}
@@ -76,14 +91,20 @@ const Products = () => {
 
         {/* Results Count */}
         <p className="text-sm text-gray-500 mb-6">
-          Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
-          {activeCategory !== 'All' && <span> in <span className="font-semibold text-blue-600">{activeCategory}</span></span>}
+          Showing <span className="font-semibold text-gray-900">{products.length}</span> products
+          {activeCategory !== 'All' && (
+            <span> in <span className="font-semibold text-blue-600">{activeCategory}</span></span>
+          )}
         </p>
 
-        {/* Products Grid */}
-        {filtered.length > 0 ? (
+        {/* Loading */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map(product => (
+            {products.map(product => (
               <Link
                 key={product.id}
                 to={`/products/${product.id}`}

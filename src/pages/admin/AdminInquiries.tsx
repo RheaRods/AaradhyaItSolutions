@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MessageSquare, Search, Filter } from 'lucide-react'
-import { inquiries } from '../../data/inquiries'
+import { getInquiries } from '../../services/admin/inquiriesService'
 
 const tabs = ['All', 'New', 'Seen', 'Replied', 'Resolved']
 
@@ -18,9 +18,25 @@ const methodColors: Record<string, string> = {
 }
 
 const AdminInquiries = () => {
+  const [inquiries, setInquiries] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('All')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        const data = await getInquiries()
+        setInquiries(data || [])
+      } catch (error) {
+        console.error('Error fetching inquiries:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchInquiries()
+  }, [])
 
   const filtered = inquiries.filter(i => {
     const matchTab = activeTab === 'All' || i.status === activeTab
@@ -30,6 +46,12 @@ const AdminInquiries = () => {
   })
 
   const selectedInquiry = inquiries.find(i => i.id === selected)
+
+  if (loading) return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -46,7 +68,7 @@ const AdminInquiries = () => {
         </button>
       </div>
 
-      {/* Search Bar */}
+      {/* Search */}
       <div className="relative mb-5">
         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
@@ -58,15 +80,12 @@ const AdminInquiries = () => {
         />
       </div>
 
-      {/* Dynamic Filter Tabs */}
+      {/* Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
         {tabs.map(tab => (
           <button
             key={tab}
-            onClick={() => {
-              setActiveTab(tab)
-              setSelected(null) // Clear panel context state on tab change
-            }}
+            onClick={() => { setActiveTab(tab); setSelected(null) }}
             className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               activeTab === tab
                 ? 'bg-blue-600 text-white'
@@ -85,15 +104,15 @@ const AdminInquiries = () => {
         ))}
       </div>
 
-      {/* Workspace Grid Layout */}
+      {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Left Column: Inquiry Item List */}
+        {/* Inquiry List */}
         <div className="lg:col-span-2 space-y-3">
           {filtered.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
               <MessageSquare size={28} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">No inquiries found matching that filter criteria.</p>
+              <p className="text-gray-500 text-sm">No inquiries found.</p>
             </div>
           ) : (
             filtered.map(inquiry => (
@@ -124,7 +143,7 @@ const AdminInquiries = () => {
           )}
         </div>
 
-        {/* Right Column: Split Detail Pane View Panel */}
+        {/* Detail Panel */}
         <div className="hidden lg:block">
           {selectedInquiry ? (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-6">
@@ -147,23 +166,22 @@ const AdminInquiries = () => {
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Message Description</p>
-                <p className="text-sm text-gray-700 leading-relaxed max-h-60 overflow-y-auto">{selectedInquiry.message}</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Message</p>
+                <p className="text-sm text-gray-700 leading-relaxed">{selectedInquiry.message}</p>
               </div>
 
               <div className="space-y-2">
-                <a
+                
                   href={`https://wa.me/919876543210?text=Hi, regarding your inquiry about ${encodeURIComponent(selectedInquiry.product)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors text-center"
+                  className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                 >
                   Reply on WhatsApp
                 </a>
                 
-                <a
                   href="tel:+919876543210"
-                  className="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors text-center"
+                  className="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   Call Customer
                 </a>
@@ -172,7 +190,7 @@ const AdminInquiries = () => {
           ) : (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center sticky top-6">
               <MessageSquare size={28} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-400">Select an inquiry from the listing to inspect live context logs.</p>
+              <p className="text-sm text-gray-400">Select an inquiry to view details.</p>
             </div>
           )}
         </div>

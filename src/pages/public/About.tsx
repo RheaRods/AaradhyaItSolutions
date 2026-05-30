@@ -1,12 +1,51 @@
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, Phone, Star, Users, Clock, Shield, Award } from 'lucide-react'
+import { getStats } from '../../services/public/statsService'
 
-const stats = [
-  { value: '500+', label: 'Businesses Served', icon: <Users size={20} /> },
-  { value: '10+', label: 'Years Experience', icon: <Clock size={20} /> },
-  { value: '50+', label: 'Products', icon: <Award size={20} /> },
-  { value: '24/7', label: 'Customer Support', icon: <Shield size={20} /> },
-]
+// Animated counter hook
+const useCounter = (target: number, duration: number = 2000) => {
+  const [count, setCount] = useState(0)
+  const [started, setStarted] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStarted(true) },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!started || target === 0) return
+    let start = 0
+    const step = target / (duration / 16)
+    const timer = setInterval(() => {
+      start += step
+      if (start >= target) { setCount(target); clearInterval(timer) }
+      else setCount(Math.floor(start))
+    }, 16)
+    return () => clearInterval(timer)
+  }, [started, target, duration])
+
+  return { count, ref }
+}
+
+// Stat card with animated counter
+const StatCard = ({ value, label, icon, suffix = '' }: { value: number, label: string, icon: React.ReactNode, suffix?: string }) => {
+  const { count, ref } = useCounter(value)
+  return (
+    <div ref={ref} className="text-center">
+      <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+        {icon}
+      </div>
+      <div className="text-3xl font-bold text-gray-900 mb-1">{count}{suffix}</div>
+      <div className="text-sm text-gray-500">{label}</div>
+    </div>
+  )
+}
 
 const team = [
   { name: 'Rajesh Naik', role: 'Founder & CEO', initials: 'RN', desc: 'Over 15 years in enterprise IT solutions across Goa and Maharashtra.' },
@@ -22,6 +61,20 @@ const testimonials = [
 ]
 
 const About = () => {
+  const [stats, setStats] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getStats()
+        setStats(data)
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      }
+    }
+    fetchStats()
+  }, [])
+
   return (
     <div className="bg-white">
 
@@ -46,15 +99,43 @@ const About = () => {
       <section className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map(stat => (
-              <div key={stat.label} className="text-center">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  {stat.icon}
+            {stats ? (
+              <>
+                <StatCard value={stats.businessesServed} label="Businesses Served" icon={<Users size={20} />} suffix="+" />
+                <StatCard value={stats.yearsExperience} label="Years Experience" icon={<Clock size={20} />} suffix="+" />
+                <StatCard value={stats.totalProducts} label="Products" icon={<Award size={20} />} suffix="+" />
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Shield size={20} />
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">24/7</div>
+                  <div className="text-sm text-gray-500">Customer Support</div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-500">{stat.label}</div>
-              </div>
-            ))}
+              </>
+            ) : (
+              <>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3"><Users size={20} /></div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">500+</div>
+                  <div className="text-sm text-gray-500">Businesses Served</div>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3"><Clock size={20} /></div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">10+</div>
+                  <div className="text-sm text-gray-500">Years Experience</div>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3"><Award size={20} /></div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">50+</div>
+                  <div className="text-sm text-gray-500">Products</div>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3"><Shield size={20} /></div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">24/7</div>
+                  <div className="text-sm text-gray-500">Customer Support</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -172,7 +253,7 @@ const About = () => {
             Get in touch with our team today for a free consultation.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
+            
               href="https://wa.me/919876543210"
               target="_blank"
               rel="noreferrer"
