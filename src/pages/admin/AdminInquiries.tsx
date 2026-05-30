@@ -170,8 +170,8 @@ const AdminInquiries = () => {
                 <p className="text-sm text-gray-700 leading-relaxed">{selectedInquiry.message}</p>
               </div>
 
-              <div className="space-y-2">
-                
+             <div className="space-y-2">
+                <a
                   href={`https://wa.me/919876543210?text=Hi, regarding your inquiry about ${encodeURIComponent(selectedInquiry.product)}`}
                   target="_blank"
                   rel="noreferrer"
@@ -179,7 +179,7 @@ const AdminInquiries = () => {
                 >
                   Reply on WhatsApp
                 </a>
-                
+                <a
                   href="tel:+919876543210"
                   className="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
                 >
