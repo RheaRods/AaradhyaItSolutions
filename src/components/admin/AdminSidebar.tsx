@@ -59,7 +59,7 @@ const SidebarContent = ({ isActive, setMobileOpen, navigate }: SidebarContentPro
         </div>
       </div>
       <button
-        onClick={() => navigate('/admin/login')}
+        onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login'); }}
         className="flex items-center gap-2 text-blue-200 hover:text-white text-sm transition-colors w-full"
       >
         <LogOut size={16} />

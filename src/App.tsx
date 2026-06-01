@@ -13,6 +13,7 @@ import Dashboard from './pages/admin/Dashboard'
 import AdminProducts from './pages/admin/AdminProducts'
 import AdminInquiries from './pages/admin/AdminInquiries'
 import AdminReviews from './pages/admin/AdminReviews'
+import AdminSettings from './pages/admin/AdminSettings'
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout'
@@ -45,6 +46,7 @@ function App() {
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/inquiries" element={<AdminInquiries />} />
           <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>
