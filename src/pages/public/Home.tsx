@@ -146,11 +146,19 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {bestSellers.map((product) => (
               <Link key={product.id} to={`/products/${product.id}`} className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                <div className="bg-linear-to-br from-blue-50 to-indigo-50 h-40 flex items-center justify-center">
+                <div className="bg-linear-to-br from-blue-50 to-indigo-50 h-52 flex items-center justify-center overflow-hidden">
+  {product.image_path ? (
+    <img
+    src={product.image_path}
+    alt={product.name}
+    className="h-full w-full object-cover"
+    />
+                  ) : (
                   <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                     <Package size={28} className="text-white" />
+                    </div>
+                  )}
                   </div>
-                </div>
                 <div className="p-5">
                   <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{product.category}</span>
                   <h3 className="font-semibold text-gray-900 mt-3 mb-1 group-hover:text-blue-600 transition-colors">{product.name}</h3>

@@ -185,7 +185,12 @@ const Dashboard = () => {
             </div>
             {data?.recentProducts?.map((product: any, i: number) => (
               <div key={i} className="grid grid-cols-5 px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors items-center">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg" />
+                <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+  {product.image_path
+    ? <img src={product.image_path} alt={product.name} className="w-full h-full object-cover" />
+    : <span className="text-gray-400 text-xs">No img</span>
+  }
+</div>
                 <div className="col-span-2">
                   <p className="text-sm font-semibold text-gray-900">{product.name}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{product.category}</p>

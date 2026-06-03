@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, Search, Filter } from 'lucide-react'
-import { getInquiries } from '../../services/admin/inquiriesService'
+import { MessageSquare, Search, Filter, CheckCircle } from 'lucide-react'
+import { getInquiries, updateInquiryStatus, deleteInquiry } from '../../services/admin/inquiriesService'
 
 const tabs = ['All', 'New', 'Seen', 'Replied', 'Resolved']
 
@@ -22,7 +22,7 @@ const AdminInquiries = () => {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('All')
   const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<number | null>(null)
 
   useEffect(() => {
     const fetchInquiries = async () => {
@@ -47,6 +47,82 @@ const AdminInquiries = () => {
 
   const selectedInquiry = inquiries.find(i => i.id === selected)
 
+  // Auto mark as Seen when selected
+  const handleSelect = async (id: number) => {
+    if (id === selected) { setSelected(null); return }
+    setSelected(id)
+    const inq = inquiries.find(i => i.id === id)
+    if (inq && inq.status === 'New') {
+      try {
+        await updateInquiryStatus(id, 'Seen')
+        setInquiries(prev => prev.map(i => i.id === id ? { ...i, status: 'Seen' } : i))
+      } catch (e) { console.error(e) }
+    }
+  }
+
+  // Mark as Replied
+  const handleWhatsApp = async (inq: any) => {
+    if (inq.status === 'New' || inq.status === 'Seen') {
+      try {
+        await updateInquiryStatus(inq.id, 'Replied')
+        setInquiries(prev => prev.map(i => i.id === inq.id ? { ...i, status: 'Replied' } : i))
+      } catch (e) { console.error(e) }
+    }
+    window.open(
+      `https://wa.me/919876543210?text=Hi, regarding your inquiry about ${encodeURIComponent(inq.product)}`,
+      '_blank'
+    )
+  }
+
+  const handleCall = async (inq: any) => {
+    if (inq.status === 'New' || inq.status === 'Seen') {
+      try {
+        await updateInquiryStatus(inq.id, 'Replied')
+        setInquiries(prev => prev.map(i => i.id === inq.id ? { ...i, status: 'Replied' } : i))
+      } catch (e) { console.error(e) }
+    }
+    window.location.href = 'tel:+919876543210'
+  }
+
+  // Mark as Resolved
+  const handleResolve = async (inq: any) => {
+    try {
+      await updateInquiryStatus(inq.id, 'Resolved')
+      setInquiries(prev => prev.map(i => i.id === inq.id ? { ...i, status: 'Resolved' } : i))
+    } catch (e) { console.error(e) }
+  }
+
+  // Delete inquiry
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this inquiry?')) return
+    try {
+      await deleteInquiry(id)
+      setInquiries(prev => prev.filter(i => i.id !== id))
+      if (selected === id) setSelected(null)
+    } catch (e) { console.error(e) }
+  }
+
+  // Export CSV
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Product', 'Method', 'Status', 'Message', 'Time']
+    const rows = inquiries.map(i => [
+      i.id,
+      `"${i.product}"`,
+      i.method,
+      i.status,
+      `"${i.message.replace(/"/g, '""')}"`,
+      `"${i.time}"`
+    ])
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `inquiries_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -62,7 +138,10 @@ const AdminInquiries = () => {
           <h1 className="text-2xl font-bold text-gray-900">Inquiry Logs</h1>
           <p className="text-gray-500 text-sm mt-1">All customer inquiries in one place.</p>
         </div>
-        <button className="flex items-center gap-2 border border-gray-200 bg-white text-gray-600 text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-2 border border-gray-200 bg-white text-gray-600 text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+        >
           <Filter size={15} />
           Export CSV
         </button>
@@ -118,7 +197,7 @@ const AdminInquiries = () => {
             filtered.map(inquiry => (
               <div
                 key={inquiry.id}
-                onClick={() => setSelected(inquiry.id === selected ? null : inquiry.id)}
+                onClick={() => handleSelect(inquiry.id)}
                 className={`bg-white rounded-2xl border shadow-sm p-5 cursor-pointer transition-all duration-200 hover:shadow-md ${
                   selected === inquiry.id ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-100'
                 }`}
@@ -163,6 +242,24 @@ const AdminInquiries = () => {
                     {selectedInquiry.method}
                   </span>
                 </div>
+                {selectedInquiry.full_name && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Name</span>
+                    <span className="text-gray-800 font-medium">{selectedInquiry.full_name}</span>
+                  </div>
+                )}
+                {selectedInquiry.phone_no && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Phone</span>
+                    <span className="text-gray-800 font-medium">{selectedInquiry.phone_no}</span>
+                  </div>
+                )}
+                {selectedInquiry.business_name && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Business</span>
+                    <span className="text-gray-800 font-medium">{selectedInquiry.business_name}</span>
+                  </div>
+                )}
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 mb-6">
@@ -170,21 +267,28 @@ const AdminInquiries = () => {
                 <p className="text-sm text-gray-700 leading-relaxed">{selectedInquiry.message}</p>
               </div>
 
-             <div className="space-y-2">
-                <a
-                  href={`https://wa.me/919876543210?text=Hi, regarding your inquiry about ${encodeURIComponent(selectedInquiry.product)}`}
-                  target="_blank"
-                  rel="noreferrer"
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleWhatsApp(selectedInquiry)}
                   className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                 >
                   Reply on WhatsApp
-                </a>
-                <a
-                  href="tel:+919876543210"
+                </button>
+                <button
+                  onClick={() => handleCall(selectedInquiry)}
                   className="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   Call Customer
-                </a>
+                </button>
+                {selectedInquiry.status !== 'Resolved' && (
+                  <button
+                    onClick={() => handleResolve(selectedInquiry)}
+                    className="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-semibold py-2.5 rounded-xl transition-colors"
+                  >
+                    <CheckCircle size={15} />
+                    Mark as Resolved
+                  </button>
+                )}
               </div>
             </div>
           ) : (

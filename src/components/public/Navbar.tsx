@@ -22,13 +22,15 @@ const Navbar = () => {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="font-bold text-gray-900 text-lg leading-tight">
-              Aaradhya <span className="text-blue-600">IT</span>
-            </span>
-          </Link>
+  <img
+    src="https://larjotmzhxdmqzktyafh.supabase.co/storage/v1/object/public/company-assets/Aaradhya_logo.png"
+    alt="Aaradhya IT"
+    className="w-10 h-10 object-contain rounded-lg"
+  />
+  <span className="font-bold text-gray-900 text-lg leading-tight">
+    Aaradhya <span className="text-blue-600">IT</span>
+  </span>
+</Link>
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center gap-8">

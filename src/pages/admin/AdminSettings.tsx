@@ -3,7 +3,8 @@ import { Bell, User, Save, Camera, Shield, Building2, BellRing, Settings2, Chevr
 
 type Tab = 'profile' | 'security' | 'company' | 'notifications' | 'system'
 
-const API_BASE = 'http://localhost:5000/api/admin'
+import API_URL from "../../config/api"
+const API_BASE = `${API_URL}/api/admin`
 
 const getToken = () => localStorage.getItem('adminToken') || ''
 
@@ -27,18 +28,18 @@ const AdminSettings = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   // Profile state
-  const [profile, setProfile] = useState({ fullName: '', email: '', phone: '', role: '' })
-
+  const [profile, setProfile] = useState({ fullName: '', email: '', phone: '', role: '', avatarPath: '' })
+const [avatarUploading, setAvatarUploading] = useState(false)
   // Password state
   const [password, setPassword] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
-  // Company state
   const [company, setCompany] = useState({
-    companyName: '', legalName: '', gstin: '', incorporationDate: '',
-    supportEmail: '', salesEmail: '', primaryPhone: '', whatsapp: '',
-    address1: '', address2: '', city: '', state: '', pin: '',
-    linkedin: '', twitter: '', facebook: ''
-  })
+  companyName: '', legalName: '', gstin: '', incorporationDate: '',
+  supportEmail: '', salesEmail: '', primaryPhone: '', whatsapp: '',
+  address1: '', address2: '', city: '', state: '', pin: '',
+  linkedin: '', twitter: '', facebook: '', logoPath: ''
+})
+const [logoUploading, setLogoUploading] = useState(false)
 
   // Notifications state
   const [notifications, setNotifications] = useState({
@@ -56,6 +57,58 @@ const AdminSettings = () => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  setLogoUploading(true)
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch(`${API_BASE}/settings/upload-logo`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: formData
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setCompany(prev => ({ ...prev, logoPath: data.url }))
+      showToast('Logo uploaded!', 'success')
+    } else {
+      showToast('Upload failed', 'error')
+    }
+  } catch {
+    showToast('Upload failed', 'error')
+  } finally {
+    setLogoUploading(false)
+  }
+}
+
+const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  setAvatarUploading(true)
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch(`${API_BASE}/settings/upload-logo`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: formData
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setProfile(prev => ({ ...prev, avatarPath: data.url }))
+      showToast('Photo uploaded!', 'success')
+    } else {
+      showToast('Upload failed', 'error')
+    }
+  } catch {
+    showToast('Upload failed', 'error')
+  } finally {
+    setAvatarUploading(false)
+  }
+}
 
   // Fetch data when tab changes
   useEffect(() => {
@@ -230,16 +283,22 @@ const AdminSettings = () => {
                       <h2 className="font-bold text-gray-900 text-lg mb-1">Admin Profile</h2>
                       <p className="text-sm text-gray-400 mb-6">Manage your personal account information</p>
                       <div className="flex items-center gap-4 mb-6">
-                        <div className="w-16 h-16 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                          {profile.fullName?.charAt(0) || 'A'}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button className="flex items-center gap-1.5 text-teal-600 text-sm font-semibold hover:underline">
-                            <Camera size={14} /> Change Photo
-                          </button>
-                          <button className="text-red-500 text-sm font-semibold hover:underline">Remove</button>
-                        </div>
-                      </div>
+  <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-teal-600 shrink-0">
+    {profile.avatarPath ? (
+      <img src={profile.avatarPath} alt="Avatar" className="w-full h-full object-cover" />
+    ) : (
+      <span className="text-white font-bold text-xl">{profile.fullName?.charAt(0) || 'A'}</span>
+    )}
+  </div>
+  <div className="flex items-center gap-3">
+    <label className="flex items-center gap-1.5 text-teal-600 text-sm font-semibold hover:underline cursor-pointer">
+      {avatarUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+      {avatarUploading ? 'Uploading...' : 'Change Photo'}
+      <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={avatarUploading} />
+    </label>
+    <button onClick={() => setProfile(prev => ({ ...prev, avatarPath: '' }))} className="text-red-500 text-sm font-semibold hover:underline">Remove</button>
+  </div>
+</div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
                           { label: 'Full Name', key: 'fullName', type: 'text' },
@@ -318,12 +377,39 @@ const AdminSettings = () => {
                 {/* Company Information */}
                 {activeTab === 'company' && (
                   <>
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                      <div className="flex items-center gap-2 mb-5">
-                        <Building2 size={18} className="text-teal-600" />
-                        <h2 className="font-bold text-gray-900 text-lg">Business Identity</h2>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-2 mb-5">
+  <Building2 size={18} className="text-teal-600" />
+  <h2 className="font-bold text-gray-900 text-lg">Business Identity</h2>
+</div>
+
+{/* Company Logo */}
+<div className="flex items-center gap-5 mb-6 p-4 border border-gray-100 rounded-xl">
+  <div className="w-20 h-20 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 shrink-0">
+    {company.logoPath ? (
+      <img src={company.logoPath} alt="Company Logo" className="w-full h-full object-contain p-1" />
+    ) : (
+      <Building2 size={28} className="text-gray-300" />
+    )}
+  </div>
+  <div>
+    <p className="text-sm font-semibold text-gray-900 mb-1">Company Logo</p>
+    <p className="text-xs text-gray-400 mb-3">Recommended: 200x200px, PNG or JPG</p>
+    <div className="flex items-center gap-3">
+      <label className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition-colors">
+        {logoUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+        {logoUploading ? 'Uploading...' : 'Upload Logo'}
+        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
+      </label>
+      {company.logoPath && (
+        <button onClick={() => setCompany(prev => ({ ...prev, logoPath: '' }))} className="text-red-500 text-sm font-semibold hover:underline">
+          Remove
+        </button>
+      )}
+    </div>
+  </div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         {[
                           { label: 'Company Name', key: 'companyName' },
                           { label: 'Legal Entity Name', key: 'legalName' },
@@ -341,7 +427,6 @@ const AdminSettings = () => {
                           </div>
                         ))}
                       </div>
-                    </div>
 
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                       <div className="flex items-center gap-2 mb-5">

@@ -238,7 +238,7 @@ const Contact = () => {
           <div className="mt-12 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
             <iframe
               title="Aaradhya IT Solutions Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3846.123456789!2d74.0!3d15.28!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sMargao%2C+Goa!5e0!3m2!1sen!2sin!4v1234567890"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3848.4551271996106!2d73.97288449999999!3d15.2974818!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bbfb30da9653d65%3A0x6d33aa67f8a85991!2sAaradhya%20IT%20Solution!5e0!3m2!1sen!2sin!4v1780377341458!5m2!1sen!2sin"
               width="100%"
               height="350"
               style={{ border: 0 }}

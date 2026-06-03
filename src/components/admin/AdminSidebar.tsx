@@ -9,7 +9,6 @@ const navItems = [
   { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={18} /> },
   { label: 'Products', path: '/admin/products', icon: <Package size={18} /> },
   { label: 'Inquiries', path: '/admin/inquiries', icon: <MessageSquare size={18} /> },
-  { label: 'Reviews', path: '/admin/reviews', icon: <Star size={18} /> },
   { label: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> },
 ]
 
