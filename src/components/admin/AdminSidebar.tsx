@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
-  LayoutDashboard, Package, MessageSquare, Star,
+  LayoutDashboard, Package, MessageSquare,
   Settings, LogOut, Menu, X
 } from 'lucide-react'
 

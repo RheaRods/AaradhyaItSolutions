@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, Search, Filter, CheckCircle } from 'lucide-react'
+import { MessageSquare, Search, Filter, CheckCircle, Trash2 } from 'lucide-react'
 import { getInquiries, updateInquiryStatus, deleteInquiry } from '../../services/admin/inquiriesService'
 
 const tabs = ['All', 'New', 'Seen', 'Replied', 'Resolved']
@@ -289,6 +289,13 @@ const AdminInquiries = () => {
                     Mark as Resolved
                   </button>
                 )}
+                <button
+                  onClick={() => handleDelete(selectedInquiry.id)}
+                  className="flex items-center justify-center gap-2 w-full bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold py-2.5 rounded-xl transition-colors"
+                >
+                  <Trash2 size={15} />
+                  Delete Inquiry
+                </button>
               </div>
             </div>
           ) : (
