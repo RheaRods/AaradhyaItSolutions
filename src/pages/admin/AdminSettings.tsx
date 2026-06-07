@@ -21,6 +21,12 @@ const Toast = ({ message, type }: { message: string; type: 'success' | 'error' }
   </div>
 )
 
+  const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
+    <div onClick={() => onChange(!value)} className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${value ? 'bg-teal-500' : 'bg-gray-200'}`}>
+      <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow transition-all ${value ? 'right-1' : 'left-1'}`} />
+    </div>
+  ) 
+
 const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState<Tab>('profile')
   const [loading, setLoading] = useState(false)
@@ -206,11 +212,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     { id: 'system' as Tab, label: 'System Configuration', icon: <Settings2 size={15} /> },
   ]
 
-  const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
-    <div onClick={() => onChange(!value)} className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${value ? 'bg-teal-500' : 'bg-gray-200'}`}>
-      <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow transition-all ${value ? 'right-1' : 'left-1'}`} />
-    </div>
-  )
+
 
   return (
     <div className="flex-1 bg-gray-50 min-h-screen">
