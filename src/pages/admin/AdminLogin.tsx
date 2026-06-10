@@ -25,7 +25,7 @@ const AdminLogin = () => {
     try {
       const data = await loginAdmin(form.username, form.password)
       if (data.token) {
-        saveToken(data.token)
+        saveToken(data.token, data.user?.fullName || data.name || 'Admin')
         navigate('/admin')
       } else {
         setError(data.message || 'Invalid username or password.')

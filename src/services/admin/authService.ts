@@ -6,9 +6,10 @@ export const loginAdmin = async (username: string, password: string) => {
   return res.data;
 };
 
-export const saveToken = (token: string) => {
-  localStorage.setItem("adminToken", token);
-};
+export const saveToken = (token: string, name?: string) => {
+  localStorage.setItem('adminToken', token)
+  if (name) localStorage.setItem('adminName', name)
+}
 
 export const getToken = () => {
   return localStorage.getItem("adminToken");

@@ -101,7 +101,7 @@ const AdminSidebar = () => {
       )}
 
       {/* Mobile spacer */}
-      <div className="lg:hidden h-12 shrink-0" />
+      <div className="lg:hidden h-16 shrink-0" />
     </>
   )
 }
