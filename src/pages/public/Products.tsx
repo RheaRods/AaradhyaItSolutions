@@ -15,15 +15,13 @@ const Products = () => {
 
   // fetch categories from public products
 useEffect(() => {
-  axios.get(`${API_URL}/api/public/products`)
+  axios.get(`${API_URL}/api/public/products/categories`)
     .then(res => {
-      const products = res.data.data || []
-      const uniqueCats = [...new Set(products.map((p: any) => p.category).filter(Boolean))] as string[]
-      setCategories(['All', ...uniqueCats])
+      const cats = res.data.data || []
+      setCategories(['All', ...cats.map((c: any) => c.name).filter(Boolean)])
     })
     .catch(() => setCategories(['All']))
 }, [])
-
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400)
     return () => clearTimeout(timer)

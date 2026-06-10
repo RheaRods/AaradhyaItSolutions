@@ -53,6 +53,11 @@ const [logoUploading, setLogoUploading] = useState(false)
     loginActivity: true, securityUpdates: true, dataExport: false, whatsappForwarding: false
   })
 
+  const [backupList, setBackupList] = useState<any[]>([])
+  const [backupLoading, setBackupLoading] = useState(false)
+  const [restoringId, setRestoringId] = useState<number | null>(null)
+  const [confirmRestore, setConfirmRestore] = useState<any | null>(null)
+
   // System state
   const [system, setSystem] = useState({
     maintenanceMode: false, language: 'English - India', timezone: 'IST - UTC+5:30',
@@ -137,6 +142,9 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           const res = await fetch(`${API_BASE}/settings/system`, { headers: authHeaders() })
           const data = await res.json()
           if (res.ok) setSystem(data)
+          const r2 = await fetch(`${API_BASE}/settings/backups`, { headers: authHeaders() })
+          const d2 = await r2.json()
+          setBackupList(d2.data || [])
         }
       } catch {
         showToast('Failed to load settings', 'error')
@@ -379,39 +387,41 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 {/* Company Information */}
                 {activeTab === 'company' && (
                   <>
-                    <div className="flex items-center gap-2 mb-5">
-  <Building2 size={18} className="text-teal-600" />
-  <h2 className="font-bold text-gray-900 text-lg">Business Identity</h2>
-</div>
+                    {/* FIX: Added missing outer card wrapper div */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                      <div className="flex items-center gap-2 mb-5">
+                        <Building2 size={18} className="text-teal-600" />
+                        <h2 className="font-bold text-gray-900 text-lg">Business Identity</h2>
+                      </div>
 
-{/* Company Logo */}
-<div className="flex items-center gap-5 mb-6 p-4 border border-gray-100 rounded-xl">
-  <div className="w-20 h-20 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 shrink-0">
-    {company.logoPath ? (
-      <img src={company.logoPath} alt="Company Logo" className="w-full h-full object-contain p-1" />
-    ) : (
-      <Building2 size={28} className="text-gray-300" />
-    )}
-  </div>
-  <div>
-    <p className="text-sm font-semibold text-gray-900 mb-1">Company Logo</p>
-    <p className="text-xs text-gray-400 mb-3">Recommended: 200x200px, PNG or JPG</p>
-    <div className="flex items-center gap-3">
-      <label className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition-colors">
-        {logoUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-        {logoUploading ? 'Uploading...' : 'Upload Logo'}
-        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
-      </label>
-      {company.logoPath && (
-        <button onClick={() => setCompany(prev => ({ ...prev, logoPath: '' }))} className="text-red-500 text-sm font-semibold hover:underline">
-          Remove
-        </button>
-      )}
-    </div>
-  </div>
-</div>
+                      {/* Company Logo */}
+                      <div className="flex items-center gap-5 mb-6 p-4 border border-gray-100 rounded-xl">
+                        <div className="w-20 h-20 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 shrink-0">
+                          {company.logoPath ? (
+                            <img src={company.logoPath} alt="Company Logo" className="w-full h-full object-contain p-1" />
+                          ) : (
+                            <Building2 size={28} className="text-gray-300" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 mb-1">Company Logo</p>
+                          <p className="text-xs text-gray-400 mb-3">Recommended: 200x200px, PNG or JPG</p>
+                          <div className="flex items-center gap-3">
+                            <label className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition-colors">
+                              {logoUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                              {logoUploading ? 'Uploading...' : 'Upload Logo'}
+                              <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={logoUploading} />
+                            </label>
+                            {company.logoPath && (
+                              <button onClick={() => setCompany(prev => ({ ...prev, logoPath: '' }))} className="text-red-500 text-sm font-semibold hover:underline">
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         {[
                           { label: 'Company Name', key: 'companyName' },
                           { label: 'Legal Entity Name', key: 'legalName' },
@@ -429,6 +439,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                           </div>
                         ))}
                       </div>
+                    </div>{/* END Business Identity card */}
 
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                       <div className="flex items-center gap-2 mb-5">
@@ -672,10 +683,13 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                         <span className="text-lg">🔄</span>
                         <h2 className="font-bold text-gray-900 text-lg">Backup & Maintenance</h2>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+
+                      {/* Auto-Backup + Frequency + Clear Cache */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end mb-6">
                         <div className="flex items-center justify-between p-4 border border-gray-100 rounded-xl">
                           <div>
                             <p className="text-sm font-semibold text-gray-900">Auto-Backup</p>
+                            <p className="text-xs text-gray-400">Daily at midnight</p>
                           </div>
                           <Toggle value={system.autoBackup} onChange={v => setSystem({ ...system, autoBackup: v })} />
                         </div>
@@ -691,9 +705,144 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                             <option>Monthly</option>
                           </select>
                         </div>
-                        <button className="flex items-center justify-center gap-2 border border-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl hover:bg-gray-50 text-sm">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`${API_BASE}/settings/clear-cache`, {
+                                method: 'POST', headers: authHeaders()
+                              })
+                              const data = await res.json()
+                              showToast(data.message || 'Cache cleared!', res.ok ? 'success' : 'error')
+                            } catch {
+                              showToast('Failed to clear cache', 'error')
+                            }
+                          }}
+                          className="flex items-center justify-center gap-2 border border-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl hover:bg-gray-50 text-sm"
+                        >
                           🗑 Clear Cache
                         </button>
+                      </div>
+
+                      {/* Manual Backup */}
+                      <div className="border-t border-gray-100 pt-5">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">Manual Backup</p>
+                            <p className="text-xs text-gray-400">Saves all products, categories and data to DB</p>
+                          </div>
+                          <button
+                            disabled={backupLoading}
+                            onClick={async () => {
+                              setBackupLoading(true)
+                              try {
+                                const res = await fetch(`${API_BASE}/settings/backup`, {
+                                  method: 'POST', headers: authHeaders()
+                                })
+                                const data = await res.json()
+                                if (res.ok) {
+                                  showToast('Backup created successfully!', 'success')
+                                  const r2 = await fetch(`${API_BASE}/settings/backups`, { headers: authHeaders() })
+                                  const d2 = await r2.json()
+                                  setBackupList(d2.data || [])
+                                } else {
+                                  showToast(data.message || 'Backup failed', 'error')
+                                }
+                              } catch {
+                                showToast('Backup failed', 'error')
+                              } finally {
+                                setBackupLoading(false)
+                              }
+                            }}
+                            className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2.5 rounded-xl"
+                          >
+                            {backupLoading
+                              ? <Loader2 size={14} className="animate-spin" />
+                              : '💾'}
+                            {backupLoading ? 'Creating...' : 'Backup Now'}
+                          </button>
+                        </div>
+
+                        {/* Backup List */}
+                        {backupList.length > 0 ? (
+                          <div className="space-y-2 mt-3">
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                              Saved Backups ({backupList.length}/30)
+                            </p>
+                            {backupList.map((b: any) => (
+                              <div key={b.backup_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${b.label === 'manual' ? 'bg-blue-100 text-blue-600' : 'bg-teal-100 text-teal-600'}`}>
+                                      {b.label === 'manual' ? 'Manual' : 'Auto'}
+                                    </span>
+                                    <p className="text-sm font-medium text-gray-700">
+                                      Backup #{b.backup_id}
+                                    </p>
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {new Date(b.backed_up_at).toLocaleString('en-IN', {
+                                      day: '2-digit', month: 'short', year: 'numeric',
+                                      hour: '2-digit', minute: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {/* FIX: Added missing opening <a tag */}
+                                  <a
+                                    href={`${API_BASE}/settings/backups/${b.backup_id}/download`}
+                                    download={`backup_${b.backup_id}.json`}
+                                    className="text-xs font-semibold text-teal-600 hover:underline px-3 py-1.5 border border-teal-200 rounded-lg"
+                                    onClick={e => {
+                                      e.preventDefault()
+                                      fetch(`${API_BASE}/settings/backups/${b.backup_id}/download`, {
+                                        headers: authHeaders()
+                                      })
+                                        .then(r => r.blob())
+                                        .then(blob => {
+                                          const url = URL.createObjectURL(blob)
+                                          const a = document.createElement('a')
+                                          a.href = url
+                                          a.download = `backup_${b.backup_id}.json`
+                                          a.click()
+                                          URL.revokeObjectURL(url)
+                                        })
+                                    }}
+                                  >
+                                    ⬇ Download
+                                  </a>
+                                  {/* Restore */}
+                                  <button
+                                    onClick={() => setConfirmRestore(b)}
+                                    disabled={restoringId === b.backup_id}
+                                    className="text-xs font-semibold text-orange-600 hover:underline px-3 py-1.5 border border-orange-200 rounded-lg disabled:opacity-50"
+                                  >
+                                    {restoringId === b.backup_id
+                                      ? <Loader2 size={12} className="animate-spin" />
+                                      : '↩ Restore'}
+                                  </button>
+                                  {/* Delete */}
+                                  <button
+                                    onClick={async () => {
+                                      if (!window.confirm('Delete this backup?')) return
+                                      await fetch(`${API_BASE}/settings/backups/${b.backup_id}`, {
+                                        method: 'DELETE', headers: authHeaders()
+                                      })
+                                      setBackupList(prev => prev.filter(x => x.backup_id !== b.backup_id))
+                                      showToast('Backup deleted', 'success')
+                                    }}
+                                    className="text-xs font-semibold text-red-500 hover:underline px-3 py-1.5 border border-red-200 rounded-lg"
+                                  >
+                                    🗑
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-400 text-center py-4">
+                            No backups yet. Click "Backup Now" or wait for auto-backup.
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>
@@ -703,6 +852,50 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           </div>
         </div>
       </div>
+
+      {/* RESTORE CONFIRM MODAL */}
+      {confirmRestore && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-base font-bold text-gray-900 mb-1">Restore Backup?</h3>
+            <p className="text-sm text-gray-500 mb-2">
+              This will <span className="font-semibold text-red-600">replace all current products and categories</span> with data from Backup #{confirmRestore.backup_id}.
+            </p>
+            <p className="text-xs text-gray-400 mb-5">
+              Created: {new Date(confirmRestore.backed_up_at).toLocaleString('en-IN')}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmRestore(null)}
+                className="px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setRestoringId(confirmRestore.backup_id)
+                  setConfirmRestore(null)
+                  try {
+                    const res = await fetch(`${API_BASE}/settings/backups/${confirmRestore.backup_id}/restore`, {
+                      method: 'POST', headers: authHeaders()
+                    })
+                    const data = await res.json()
+                    if (res.ok) showToast('Data restored successfully!', 'success')
+                    else showToast(data.message || 'Restore failed', 'error')
+                  } catch {
+                    showToast('Restore failed', 'error')
+                  } finally {
+                    setRestoringId(null)
+                  }
+                }}
+                className="px-4 py-2 text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold"
+              >
+                Yes, Restore
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

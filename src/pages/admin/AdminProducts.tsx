@@ -5,7 +5,123 @@ import {
   getProducts, addProduct, updateProduct,
   deleteProduct, deleteProducts, getProduct, toggleProduct
 } from '../../services/admin/productService'
-import { getCategories } from '../../services/admin/categoriesService'
+import { getCategories, addCategory, deleteCategory } from '../../services/admin/categoriesService'
+
+const CategoryDropdown = ({
+  categories, value, onChange, onDelete, onAdd, newCategoryName, setNewCategoryName
+}: {
+  categories: any[]
+  value: any
+  onChange: (val: string) => void
+  onDelete: (id: number) => void
+  onAdd: () => void
+  newCategoryName: string
+  setNewCategoryName: (v: string) => void
+}) => {
+  const [open, setOpen] = useState(false)
+  const [adding, setAdding] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+        setAdding(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  useEffect(() => {
+    if (adding) inputRef.current?.focus()
+  }, [adding])
+
+  const selectedName = categories.find(c => String(c.cat_id) === String(value))?.name || ''
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setAdding(false) }}
+        className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <span className={selectedName ? 'text-gray-800' : 'text-gray-400'}>
+          {selectedName || 'Select category'}
+        </span>
+        <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+          {categories.map(c => (
+            <div
+              key={c.cat_id}
+              className={`flex items-center border-b border-gray-50 hover:bg-gray-50 transition-colors ${String(value) === String(c.cat_id) ? 'bg-blue-50' : ''}`}
+            >
+              <button
+                type="button"
+                onClick={() => { onChange(c.cat_id); setOpen(false) }}
+                className={`flex-1 text-left px-4 py-2.5 text-sm ${String(value) === String(c.cat_id) ? 'text-blue-600 font-medium' : 'text-gray-700'}`}
+              >
+                {c.name}
+              </button>
+              <button
+                type="button"
+                onClick={e => { e.stopPropagation(); onDelete(c.cat_id) }}
+                className="pr-3 text-gray-300 hover:text-red-500 transition-colors"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+
+          <div className="border-t border-gray-100" />
+
+          {adding ? (
+            <div className="px-3 py-2.5 bg-blue-50 flex items-center gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={newCategoryName}
+                onChange={e => setNewCategoryName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { onAdd(); setAdding(false); setOpen(false) }
+                  if (e.key === 'Escape') { setAdding(false); setNewCategoryName('') }
+                }}
+                placeholder="Category name..."
+                className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                type="button"
+                onClick={() => { onAdd(); setAdding(false); setOpen(false) }}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAdding(false); setNewCategoryName('') }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 font-medium"
+            >
+              <Plus size={14} /> Add new category
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const emptyForm = {
   name: '',
@@ -30,7 +146,10 @@ const AdminProducts = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
 
   const [showForm, setShowForm] = useState(false)
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null)
   const [selected, setSelected] = useState<number[]>([])
 
   const [form, setForm] = useState({ ...emptyForm })
@@ -95,11 +214,11 @@ const AdminProducts = () => {
   }
 
   const handleToggleActive = async (product: any) => {
-  try {
-    await toggleProduct(product.prod_id, !product.is_active)
-    setProductList(prev => prev.map(p => p.prod_id === product.prod_id ? { ...p, is_active: !p.is_active } : p))
-  } catch (e) { console.error(e) }
-}
+    try {
+      await toggleProduct(product.prod_id, !product.is_active)
+      setProductList(prev => prev.map(p => p.prod_id === product.prod_id ? { ...p, is_active: !p.is_active } : p))
+    } catch (e) { console.error(e) }
+  }
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -161,6 +280,8 @@ const AdminProducts = () => {
 
   const resetModal = () => {
     setShowForm(false)
+    setShowAddCategory(false)
+    setNewCategoryName('')
     setEditingProduct(null)
     setForm({ ...emptyForm })
     setMainImage(null)
@@ -169,6 +290,17 @@ const AdminProducts = () => {
     setExistingImage('')
     setExistingCatalogue('')
     setExistingGallery([])
+  }
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return
+    try {
+      const created = await addCategory(newCategoryName.trim())
+      setCategories(prev => [...prev, created])
+      setForm(prev => ({ ...prev, cat_id: created.cat_id }))
+      setNewCategoryName('')
+      setShowAddCategory(false)
+    } catch (e) { console.error(e) }
   }
 
   const handleSave = async () => {
@@ -193,11 +325,11 @@ const AdminProducts = () => {
       galleryImages.forEach(img => fd.append('images', img.file))
 
       if (editingProduct) {
-  fd.append('existing_image', existingImage)
-  fd.append('existing_catalogue', existingCatalogue)
-  fd.append('existing_gallery', JSON.stringify(existingGallery))
-  await updateProduct(editingProduct.prod_id, fd)
-} else {
+        fd.append('existing_image', existingImage)
+        fd.append('existing_catalogue', existingCatalogue)
+        fd.append('existing_gallery', JSON.stringify(existingGallery))
+        await updateProduct(editingProduct.prod_id, fd)
+      } else {
         await addProduct(fd)
       }
 
@@ -248,7 +380,10 @@ const AdminProducts = () => {
             </div>
             <select
               className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white"
-              onChange={e => setSearch(e.target.value === 'all' ? '' : e.target.value)}
+              onChange={e => {
+                if (e.target.value === 'all') setSearch('')
+                else setSearch(e.target.value)
+              }}
             >
               <option value="all">All Categories</option>
               {categories.map((c: any) => (
@@ -319,12 +454,12 @@ const AdminProducts = () => {
                             {product.type}
                           </span>
                           <div className="flex items-center gap-3">
-  <button onClick={() => openEditModal(product)} className="text-green-600 hover:text-green-700"><Edit size={15} /></button>
-  <button onClick={() => handleToggleActive(product)} className={`${product.is_active ? 'text-orange-500 hover:text-orange-700' : 'text-teal-600 hover:text-teal-700'}`}>
-    <PowerOff size={15} />
-  </button>
-  <button onClick={() => setDeleteId(product.prod_id)} className="text-red-600 hover:text-red-700"><Trash2 size={15} /></button>
-</div>
+                            <button onClick={() => openEditModal(product)} className="text-green-600 hover:text-green-700"><Edit size={15} /></button>
+                            <button onClick={() => handleToggleActive(product)} className={`${product.is_active ? 'text-orange-500 hover:text-orange-700' : 'text-teal-600 hover:text-teal-700'}`}>
+                              <PowerOff size={15} />
+                            </button>
+                            <button onClick={() => setDeleteId(product.prod_id)} className="text-red-600 hover:text-red-700"><Trash2 size={15} /></button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -344,10 +479,10 @@ const AdminProducts = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-sm text-gray-900">{product.name}</p>
-<div className="flex items-center gap-2">
-  <p className="text-xs text-gray-400">#{product.prod_id}</p>
-  {!product.is_active && <span className="text-xs bg-orange-100 text-orange-600 font-semibold px-1.5 py-0.5 rounded-full">Discontinued</span>}
-</div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-400">#{product.prod_id}</p>
+                          {!product.is_active && <span className="text-xs bg-orange-100 text-orange-600 font-semibold px-1.5 py-0.5 rounded-full">Discontinued</span>}
+                        </div>
                       </div>
                     </div>
                     <span className="text-sm text-gray-600">{product.category}</span>
@@ -355,16 +490,16 @@ const AdminProducts = () => {
                       {product.type}
                     </span>
                     <div className="flex items-center gap-3">
-  <button onClick={() => openEditModal(product)} className="flex items-center gap-1 text-green-600 hover:text-green-700 text-sm">
-    <Edit size={14} /> Edit
-  </button>
-  <button onClick={() => handleToggleActive(product)} className={`flex items-center gap-1 text-sm ${product.is_active ? 'text-orange-500 hover:text-orange-700' : 'text-teal-600 hover:text-teal-700'}`}>
-    <PowerOff size={14} /> {product.is_active ? 'Discontinue' : 'Activate'}
-  </button>
-  <button onClick={() => setDeleteId(product.prod_id)} className="flex items-center gap-1 text-red-600 hover:text-red-700 text-sm">
-    <Trash2 size={14} /> Delete
-  </button>
-</div>
+                      <button onClick={() => openEditModal(product)} className="flex items-center gap-1 text-green-600 hover:text-green-700 text-sm">
+                        <Edit size={14} /> Edit
+                      </button>
+                      <button onClick={() => handleToggleActive(product)} className={`flex items-center gap-1 text-sm ${product.is_active ? 'text-orange-500 hover:text-orange-700' : 'text-teal-600 hover:text-teal-700'}`}>
+                        <PowerOff size={14} /> {product.is_active ? 'Discontinue' : 'Activate'}
+                      </button>
+                      <button onClick={() => setDeleteId(product.prod_id)} className="flex items-center gap-1 text-red-600 hover:text-red-700 text-sm">
+                        <Trash2 size={14} /> Delete
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
@@ -396,20 +531,30 @@ const AdminProducts = () => {
 
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4">
+
+                {/* Product Name - full width */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
                   <input name="name" value={form.name} onChange={handleFormChange}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g. Marg ERP Software" />
                 </div>
+
+                {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select name="cat_id" value={form.cat_id} onChange={handleFormChange}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Select category</option>
-                    {categories.map((c: any) => <option key={c.cat_id} value={c.cat_id}>{c.name}</option>)}
-                  </select>
+                  <CategoryDropdown
+                    categories={categories}
+                    value={form.cat_id}
+                    onChange={val => setForm(prev => ({ ...prev, cat_id: val }))}
+                    onDelete={id => setDeletingCategoryId(id)}
+                    onAdd={handleAddCategory}
+                    newCategoryName={newCategoryName}
+                    setNewCategoryName={setNewCategoryName}
+                  />
                 </div>
+
+                {/* Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select name="type" value={form.type} onChange={handleFormChange}
@@ -418,19 +563,24 @@ const AdminProducts = () => {
                     <option>Hardware</option>
                   </select>
                 </div>
+
+                {/* Short Description - full width */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Short Description *</label>
                   <input name="short_desc" value={form.short_desc} onChange={handleFormChange}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Brief one-line description" />
                 </div>
+
+                {/* Full Description - full width */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
                   <textarea name="full_desc" value={form.full_desc} onChange={handleFormChange} rows={3}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Detailed product description" />
                 </div>
-              </div>
+
+              </div>{/* end grid */}
 
               {/* Main Image */}
               <div>
@@ -486,18 +636,18 @@ const AdminProducts = () => {
                       <button type="button" onClick={e => { e.stopPropagation(); setCatalogueFile(null) }} className="ml-2 text-red-500 hover:text-red-700"><X size={16} /></button>
                     </div>
                   ) : existingCatalogue ? (
-  <div className="flex items-center gap-3 justify-center">
-    <FileText size={20} className="text-blue-500" />
-    <p className="text-sm text-gray-500">{existingCatalogue.split('/').pop()?.replace(/_/g, ' ') || 'Brochure uploaded'}</p>
-    <a href={existingCatalogue} target="_blank" rel="noreferrer"
-      onClick={e => e.stopPropagation()}
-      className="text-blue-600 text-sm font-medium hover:underline"
-    >View</a>
-    <button type="button"
-      onClick={e => { e.stopPropagation(); if (window.confirm('Are you sure you want to remove this brochure?')) setExistingCatalogue('') }}
-      className="ml-2 text-red-500 hover:text-red-700"
-    ><X size={16} /></button>
-  </div>
+                    <div className="flex items-center gap-3 justify-center">
+                      <FileText size={20} className="text-blue-500" />
+                      <p className="text-sm text-gray-500">{existingCatalogue.split('/').pop()?.replace(/_/g, ' ') || 'Brochure uploaded'}</p>
+                      <a href={existingCatalogue} target="_blank" rel="noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="text-blue-600 text-sm font-medium hover:underline"
+                      >View</a>
+                      <button type="button"
+                        onClick={e => { e.stopPropagation(); if (window.confirm('Are you sure you want to remove this brochure?')) setExistingCatalogue('') }}
+                        className="ml-2 text-red-500 hover:text-red-700"
+                      ><X size={16} /></button>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2 justify-center text-gray-400">
                       <FileText size={18} />
@@ -614,6 +764,44 @@ const AdminProducts = () => {
           </div>
         </div>
       )}
+
+      {/* DELETE CONFIRM MODAL */}
+      {/* DELETE CATEGORY CONFIRM MODAL */}
+      {deletingCategoryId !== null && (() => {
+        const cat = categories.find(c => c.cat_id === deletingCategoryId)
+        if (!cat) return null
+        return (
+          <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+              <h3 className="text-base font-bold text-gray-900 mb-1">Delete Category?</h3>
+              <p className="text-sm text-gray-500 mb-5">
+                Delete <span className="font-semibold text-gray-700">"{cat.name}"</span>? Categories with products attached cannot be deleted.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setDeletingCategoryId(null)}
+                  className="px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await deleteCategory(cat.cat_id)
+                      setCategories(prev => prev.filter(c => c.cat_id !== cat.cat_id))
+                      if (String(form.cat_id) === String(cat.cat_id)) setForm(prev => ({ ...prev, cat_id: '' }))
+                    } catch (err: any) {
+                      alert(err?.response?.data?.message || 'Cannot delete this category')
+                    } finally {
+                      setDeletingCategoryId(null)
+                    }
+                  }}
+                  className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* DELETE CONFIRM MODAL */}
       {deleteId !== null && (

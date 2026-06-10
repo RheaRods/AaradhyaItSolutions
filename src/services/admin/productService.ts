@@ -4,10 +4,11 @@ import { getToken } from "./authService";
 
 const auth = () => ({ Authorization: `Bearer ${getToken()}` });
 
-export const getProducts = async (search = "", type = "All") => {
+export const getProducts = async (search = "", type = "All", categoryFilter: string | number = "") => {
   const params: Record<string, string> = {};
   if (search) params.search = search;
   if (type !== "All") params.type = type;
+  if (categoryFilter) params.cat_id = categoryFilter.toString();
   const res = await axios.get(`${API_URL}/api/admin/products`, {
     headers: auth(), params,
   });
@@ -51,6 +52,6 @@ export const deleteProducts = async (ids: number[]) => {
 export const toggleProduct = async (id: number, is_active: boolean) => {
   const res = await axios.patch(`${API_URL}/api/admin/products/${id}/toggle`, { is_active }, {
     headers: auth()
-  })
-  return res.data
-}
+  });
+  return res.data;
+};
