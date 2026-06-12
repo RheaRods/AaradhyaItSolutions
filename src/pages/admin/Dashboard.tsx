@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, MoreHorizontal, Bell, Calendar, Edit, Trash2, Megaphone, Download, HeadphonesIcon } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  Plus, MoreHorizontal, Bell, Calendar, Edit, Trash2,
+  Megaphone, Download, HeadphonesIcon, Loader2, ChevronDown
+} from 'lucide-react'
 import { getDashboardData } from '../../services/admin/dashboardService'
+import { exportInquiriesCSV, exportProductsCSV } from '../../services/admin/reportsService'
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exporting, setExporting] = useState<'inquiries' | 'products' | null>(null)
+
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+  })
 
   const statusColors: Record<string, string> = {
     New: 'bg-yellow-400 text-white',
@@ -28,6 +38,27 @@ const Dashboard = () => {
     }
     fetchData()
   }, [])
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    if (!exportOpen) return
+    const handler = () => setExportOpen(false)
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [exportOpen])
+
+  const handleExport = async (type: 'inquiries' | 'products') => {
+    setExporting(type)
+    setExportOpen(false)
+    try {
+      if (type === 'inquiries') await exportInquiriesCSV()
+      else await exportProductsCSV()
+    } catch (e) {
+      console.error('Export failed', e)
+    } finally {
+      setExporting(null)
+    }
+  }
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center min-h-screen">
@@ -141,6 +172,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h2 className="font-bold text-gray-900 mb-5">Quick Actions</h2>
             <div className="space-y-3">
+
+              {/* Add New Product */}
               <Link
                 to="/admin/products"
                 className="flex items-center justify-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
@@ -148,18 +181,61 @@ const Dashboard = () => {
                 <Plus size={17} />
                 Add New Product
               </Link>
-              <button className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition-colors text-sm">
+
+              {/* Post Announcement */}
+              <button
+                onClick={() => navigate('/admin/announcements')}
+                className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-blue-300 hover:text-blue-600 text-gray-700 font-semibold py-3 rounded-xl transition-colors text-sm"
+              >
                 <Megaphone size={17} />
                 Post Announcement
               </button>
-              <button className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition-colors text-sm">
-                <Download size={17} />
-                Export Reports
-              </button>
-              <button className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition-colors text-sm">
+
+              {/* Export Reports — dropdown */}
+              <div className="relative" onMouseDown={e => e.stopPropagation()}>
+                <button
+                  onClick={() => setExportOpen(o => !o)}
+                  disabled={exporting !== null}
+                  className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-blue-300 hover:text-blue-600 text-gray-700 font-semibold py-3 rounded-xl transition-colors text-sm disabled:opacity-60"
+                >
+                  {exporting ? (
+                    <Loader2 size={17} className="animate-spin" />
+                  ) : (
+                    <Download size={17} />
+                  )}
+                  {exporting ? `Exporting ${exporting}...` : 'Export Reports'}
+                  {!exporting && <ChevronDown size={14} className={`ml-auto transition-transform ${exportOpen ? 'rotate-180' : ''}`} />}
+                </button>
+
+                {exportOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20">
+                    <button
+                      onClick={() => handleExport('inquiries')}
+                      className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors"
+                    >
+                      📋 Export Inquiries CSV
+                    </button>
+                    <button
+                      onClick={() => handleExport('products')}
+                      className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 font-medium transition-colors border-t border-gray-50"
+                    >
+                      📦 Export Products CSV
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Support Log — placeholder for future */}
+              <button
+                disabled
+                title="Coming soon"
+                className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-200 text-gray-400 font-semibold py-3 rounded-xl text-sm cursor-not-allowed"
+              >
                 <HeadphonesIcon size={17} />
                 Support Log
+                <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full ml-1">Soon</span>
               </button>
+
             </div>
           </div>
         </div>

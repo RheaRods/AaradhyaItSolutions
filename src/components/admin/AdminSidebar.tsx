@@ -2,17 +2,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   LayoutDashboard, Package, MessageSquare,
-  Settings, LogOut, Menu, X
+  Settings, LogOut, Menu, X, Megaphone
 } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={18} /> },
-  { label: 'Products', path: '/admin/products', icon: <Package size={18} /> },
-  { label: 'Inquiries', path: '/admin/inquiries', icon: <MessageSquare size={18} /> },
-  { label: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> },
+  { label: 'Dashboard',      path: '/admin',               icon: <LayoutDashboard size={18} /> },
+  { label: 'Products',       path: '/admin/products',      icon: <Package size={18} /> },
+  { label: 'Inquiries',      path: '/admin/inquiries',     icon: <MessageSquare size={18} /> },
+  { label: 'Announcements',  path: '/admin/announcements', icon: <Megaphone size={18} /> },
+  { label: 'Settings',       path: '/admin/settings',      icon: <Settings size={18} /> },
 ]
 
-// 1. SidebarContent moved outside to remove the re-creation bug
 interface SidebarContentProps {
   isActive: (path: string) => boolean
   setMobileOpen: (open: boolean) => void
@@ -58,7 +58,7 @@ const SidebarContent = ({ isActive, setMobileOpen, navigate }: SidebarContentPro
         </div>
       </div>
       <button
-        onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login'); }}
+        onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login') }}
         className="flex items-center gap-2 text-blue-200 hover:text-white text-sm transition-colors w-full"
       >
         <LogOut size={16} />

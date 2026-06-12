@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 
+
 // Public Pages
 import Home from './pages/public/Home'
 import Products from './pages/public/Products'
@@ -14,6 +15,7 @@ import Dashboard from './pages/admin/Dashboard'
 import AdminProducts from './pages/admin/AdminProducts'
 import AdminInquiries from './pages/admin/AdminInquiries'
 import AdminSettings from './pages/admin/AdminSettings'
+import AdminAnnouncements from './pages/admin/AdminAnnouncements'
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout'
@@ -53,6 +55,7 @@ function App() {
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/inquiries" element={<AdminInquiries />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/announcements" element={<AdminAnnouncements />} />
         </Route>
       </Routes>
     </BrowserRouter>
