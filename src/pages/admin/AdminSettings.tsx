@@ -6,7 +6,8 @@ type Tab = 'profile' | 'security' | 'company' | 'notifications' | 'system'
 import API_URL from "../../config/api"
 const API_BASE = `${API_URL}/api/admin`
 
-const getToken = () => localStorage.getItem('adminToken') || ''
+// Changed to strictly check sessionStorage to align with Issue 1 fix
+const getToken = () => sessionStorage.getItem('adminToken') || ''
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
@@ -21,11 +22,11 @@ const Toast = ({ message, type }: { message: string; type: 'success' | 'error' }
   </div>
 )
 
-  const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
-    <div onClick={() => onChange(!value)} className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${value ? 'bg-teal-500' : 'bg-gray-200'}`}>
-      <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow transition-all ${value ? 'right-1' : 'left-1'}`} />
-    </div>
-  ) 
+const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
+  <div onClick={() => onChange(!value)} className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${value ? 'bg-teal-500' : 'bg-gray-200'}`}>
+    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow transition-all ${value ? 'right-1' : 'left-1'}`} />
+  </div>
+) 
 
 const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState<Tab>('profile')
@@ -35,7 +36,7 @@ const AdminSettings = () => {
 
   // Profile state
   const [profile, setProfile] = useState({ fullName: '', email: '', phone: '', role: '', avatarPath: '' })
-const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
   // Password state
   const [password, setPassword] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
@@ -110,6 +111,11 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = await res.json()
     if (res.ok) {
       setProfile(prev => ({ ...prev, avatarPath: data.url }))
+      
+      // ISSUE 3 FIX: Save avatar directly to localStorage and trigger sidebar update
+      localStorage.setItem('adminAvatar', data.url)
+      window.dispatchEvent(new Event('storage'))
+      
       showToast('Photo uploaded!', 'success')
     } else {
       showToast('Upload failed', 'error')
@@ -163,7 +169,13 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           method: 'PUT', headers: authHeaders(), body: JSON.stringify(profile)
         })
         const data = await res.json()
-        if (res.ok) showToast('Profile saved successfully!', 'success')
+        if (res.ok) {
+          showToast('Profile saved successfully!', 'success')
+          
+          // ISSUE 2 FIX: Sync the updated name to localStorage and dispatch event for sidebar
+          localStorage.setItem('adminName', profile.fullName)
+          window.dispatchEvent(new Event('storage'))
+        }
         else showToast(data.message || 'Failed to save', 'error')
 
       } else if (activeTab === 'security') {
@@ -243,11 +255,9 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           </div>
           <h1 className="text-xl font-bold text-gray-900">Settings</h1>
         </div>
+        
+        {/* Removed Bell and User icons from here, keeping only the Save button */}
         <div className="flex items-center gap-3">
-          <Bell size={20} className="text-gray-400" />
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-            <User size={16} className="text-gray-500" />
-          </div>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -306,7 +316,11 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       {avatarUploading ? 'Uploading...' : 'Change Photo'}
       <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={avatarUploading} />
     </label>
-    <button onClick={() => setProfile(prev => ({ ...prev, avatarPath: '' }))} className="text-red-500 text-sm font-semibold hover:underline">Remove</button>
+    <button onClick={() => {
+      setProfile(prev => ({ ...prev, avatarPath: '' }))
+      localStorage.setItem('adminAvatar', '')
+      window.dispatchEvent(new Event('storage'))
+    }} className="text-red-500 text-sm font-semibold hover:underline">Remove</button>
   </div>
 </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -387,7 +401,6 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 {/* Company Information */}
                 {activeTab === 'company' && (
                   <>
-                    {/* FIX: Added missing outer card wrapper div */}
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                       <div className="flex items-center gap-2 mb-5">
                         <Building2 size={18} className="text-teal-600" />
@@ -787,7 +800,6 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {/* FIX: Added missing opening <a tag */}
                                   <a
                                     href={`${API_BASE}/settings/backups/${b.backup_id}/download`}
                                     download={`backup_${b.backup_id}.json`}

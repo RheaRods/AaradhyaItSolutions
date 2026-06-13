@@ -13,6 +13,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [exportOpen, setExportOpen] = useState(false)
   const [exporting, setExporting] = useState<'inquiries' | 'products' | null>(null)
+  
+  // Add state for adminName so it can update dynamically
+  const [adminName, setAdminName] = useState(localStorage.getItem('adminName') || 'Admin')
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
@@ -24,6 +27,17 @@ const Dashboard = () => {
     Replied: 'bg-green-100 text-green-700',
     Resolved: 'bg-blue-100 text-blue-700',
   }
+
+  // Listen for the 'storage' event triggered by AdminSidebar (when it fetches from DB) or AdminSettings
+  useEffect(() => {
+    const syncName = () => {
+      setAdminName(localStorage.getItem('adminName') || 'Admin')
+    }
+    
+    window.addEventListener('storage', syncName)
+    // Cleanup listener on unmount
+    return () => window.removeEventListener('storage', syncName)
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +87,7 @@ const Dashboard = () => {
       <div className="bg-white border-b border-gray-100 px-4 md:px-8 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-400 text-sm">Welcome back, {localStorage.getItem('adminName') || 'Admin'}</p>
+          <p className="text-gray-400 text-sm">Welcome back, {adminName}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 text-gray-500 text-sm">
