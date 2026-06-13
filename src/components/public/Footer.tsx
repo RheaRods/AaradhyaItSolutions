@@ -1,9 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Phone, Mail, MapPin, MessageCircle, ArrowUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const Footer = () => {
-  const navigate = useNavigate()
   const [showBackToTop, setShowBackToTop] = useState(false)
 
   useEffect(() => {
@@ -11,11 +10,6 @@ const Footer = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const handleNav = (path: string) => {
-    navigate(path)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -85,12 +79,14 @@ const Footer = () => {
                   { label: 'Contact Us', path: '/contact' },
                 ].map(link => (
                   <li key={link.path}>
-                    <button
-                      onClick={() => handleNav(link.path)}
-                      className="text-sm text-gray-400 hover:text-white transition-colors text-left"
+                    {/* Swapped button for Link and allowed ScrollToTop to handle the route change */}
+                    <Link
+                      to={link.path}
+                      onClick={() => window.scrollTo(0, 0)}
+                      className="text-sm text-gray-400 hover:text-white transition-colors block text-left"
                     >
                       {link.label}
-                    </button>
+                    </Link>
                   </li>
                 ))}
               </ul>
