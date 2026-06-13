@@ -7,7 +7,7 @@ export const getActiveAnnouncement = async (): Promise<{
   is_active: boolean
 } | null> => {
   try {
-    const res = await fetch(`${API_URL}/api/announcements/public/active`)
+    const res = await fetch(`${API_URL}/api/public/announcements/active`)
     const data = await res.json()
     return data.data || null
   } catch {
