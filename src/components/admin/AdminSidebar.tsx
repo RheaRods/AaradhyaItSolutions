@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Package, MessageSquare,
-  Settings, LogOut, Menu, X, Megaphone
+  Settings, LogOut, Menu, X, Megaphone, Users
 } from 'lucide-react'
 import { logout } from '../../services/admin/authService'
 import API_URL from '../../config/api'
@@ -10,6 +10,7 @@ import API_URL from '../../config/api'
 const navItems = [
   { label: 'Dashboard',      path: '/admin',               icon: <LayoutDashboard size={18} /> },
   { label: 'Products',       path: '/admin/products',      icon: <Package size={18} /> },
+  { label: 'Team',           path: '/admin/employees',     icon: <Users size={18} /> },
   { label: 'Inquiries',      path: '/admin/inquiries',     icon: <MessageSquare size={18} /> },
   { label: 'Announcements',  path: '/admin/announcements', icon: <Megaphone size={18} /> },
   { label: 'Settings',       path: '/admin/settings',      icon: <Settings size={18} /> },

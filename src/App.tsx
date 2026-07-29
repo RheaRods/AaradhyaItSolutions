@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 
-
 // Public Pages
 import Home from './pages/public/Home'
 import Products from './pages/public/Products'
 import ProductDetail from './pages/public/ProductDetail'
+import MargErp from './pages/public/MargERP'
 import About from './pages/public/About'
 import Contact from './pages/public/Contact'
 
@@ -16,6 +16,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import AdminInquiries from './pages/admin/AdminInquiries'
 import AdminSettings from './pages/admin/AdminSettings'
 import AdminAnnouncements from './pages/admin/AdminAnnouncements'
+import AdminEmployees from './pages/admin/Employees'
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout'
@@ -40,6 +41,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/marg-erp" element={<MargErp />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
         </Route>
@@ -56,6 +58,7 @@ function App() {
           <Route path="/admin/inquiries" element={<AdminInquiries />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+          <Route path="/admin/employees" element={<AdminEmployees />} />
         </Route>
       </Routes>
     </BrowserRouter>

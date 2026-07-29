@@ -5,7 +5,7 @@ import {
   getProducts, addProduct, updateProduct,
   deleteProduct, deleteProducts, getProduct, toggleProduct
 } from '../../services/admin/productService'
-import { getCategories, addCategory, deleteCategory } from '../../services/admin/categoriesService'
+import { getCategories, addCategory } from '../../services/admin/categoriesService'
 
 const CategoryDropdown = ({
   categories, value, onChange, onDelete, onAdd, newCategoryName, setNewCategoryName
@@ -50,7 +50,9 @@ const CategoryDropdown = ({
         <span className={selectedName ? 'text-gray-800' : 'text-gray-400'}>
           {selectedName || 'Select category'}
         </span>
-        <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+        <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
       {open && (
@@ -531,8 +533,6 @@ const AdminProducts = () => {
 
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4">
-
-                {/* Product Name - full width */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
                   <input name="name" value={form.name} onChange={handleFormChange}
@@ -540,7 +540,6 @@ const AdminProducts = () => {
                     placeholder="e.g. Marg ERP Software" />
                 </div>
 
-                {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <CategoryDropdown
@@ -554,7 +553,6 @@ const AdminProducts = () => {
                   />
                 </div>
 
-                {/* Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select name="type" value={form.type} onChange={handleFormChange}
@@ -564,7 +562,6 @@ const AdminProducts = () => {
                   </select>
                 </div>
 
-                {/* Short Description - full width */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Short Description *</label>
                   <input name="short_desc" value={form.short_desc} onChange={handleFormChange}
@@ -572,15 +569,13 @@ const AdminProducts = () => {
                     placeholder="Brief one-line description" />
                 </div>
 
-                {/* Full Description - full width */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
                   <textarea name="full_desc" value={form.full_desc} onChange={handleFormChange} rows={3}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Detailed product description" />
                 </div>
-
-              </div>{/* end grid */}
+              </div>
 
               {/* Main Image */}
               <div>
@@ -593,7 +588,7 @@ const AdminProducts = () => {
                 >
                   {mainImage ? (
                     <div className="flex items-center gap-3 justify-center">
-                      <img src={mainImage.preview} className="w-16 h-16 object-cover rounded-lg" />
+                      <img src={mainImage.preview} className="w-16 h-16 object-cover rounded-lg" alt="Main preview" />
                       <div className="text-left">
                         <p className="text-sm font-medium text-gray-900">{mainImage.file.name}</p>
                         <p className="text-xs text-gray-400">{(mainImage.file.size / 1024).toFixed(0)} KB</p>
@@ -602,7 +597,7 @@ const AdminProducts = () => {
                     </div>
                   ) : existingImage ? (
                     <div className="relative flex items-center justify-center">
-                      <img src={existingImage} className="w-full h-32 object-contain rounded-lg" />
+                      <img src={existingImage} className="w-full h-32 object-contain rounded-lg" alt="Existing main" />
                       <button type="button"
                         onClick={e => { e.stopPropagation(); if (window.confirm('Are you sure you want to remove this image?')) setExistingImage('') }}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
@@ -667,151 +662,141 @@ const AdminProducts = () => {
                 <div
                   onClick={() => galleryRef.current?.click()}
                   onDragOver={e => e.preventDefault()}
-                  onDrop={e => { e.preventDefault(); if (e.dataTransfer.files.length) handleGalleryAdd(e.dataTransfer.files) }}
-                  className="border-2 border-dashed border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all"
+                  onDrop={e => {
+                    e.preventDefault()
+                    if (e.dataTransfer.files?.length) handleGalleryAdd(e.dataTransfer.files)
+                  }}
+                  className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all"
                 >
-                  {existingGallery.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {existingGallery.map((url, i) => (
-                        <div key={i} className="relative">
-                          <img src={url} className="w-16 h-16 object-cover rounded-lg border border-gray-200" />
-                          <button type="button"
-                            onClick={e => { e.stopPropagation(); if (window.confirm('Are you sure you want to remove this image?')) setExistingGallery(prev => prev.filter((_, idx) => idx !== i)) }}
-                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-                          ><X size={10} /></button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {galleryImages.length > 0 ? (
-                    <div className="flex flex-wrap gap-3">
-                      {galleryImages.map((img, i) => (
-                        <div key={i} className="relative">
-                          <img src={img.preview} className="w-16 h-16 object-cover rounded-lg" />
-                          <button type="button"
-                            onClick={e => { e.stopPropagation(); removeGalleryImage(i) }}
-                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-                          ><X size={10} /></button>
-                        </div>
-                      ))}
-                      <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400">
-                        <Plus size={18} />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <Upload size={20} className="mx-auto text-gray-400 mb-1" />
-                      <p className="text-sm text-gray-400">Add more product photos (optional)</p>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 justify-center text-gray-400">
+                    <Upload size={18} />
+                    <p className="text-sm">Upload additional images (optional)</p>
+                  </div>
                 </div>
                 <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden"
-                  onChange={e => { if (e.target.files?.length) handleGalleryAdd(e.target.files) }} />
+                  onChange={e => { if (e.target.files) handleGalleryAdd(e.target.files) }} />
+
+                {/* Display existing and newly added gallery previews */}
+                {(existingGallery.length > 0 || galleryImages.length > 0) && (
+                  <div className="grid grid-cols-4 gap-2 mt-3">
+                    {existingGallery.map((url, idx) => (
+                      <div key={`exist-${idx}`} className="relative h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+                        <img src={url} alt="Gallery" className="w-full h-full object-cover" />
+                        <button type="button"
+                          onClick={() => setExistingGallery(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                    {galleryImages.map((img, idx) => (
+                      <div key={`new-${idx}`} className="relative h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+                        <img src={img.preview} alt="New Gallery" className="w-full h-full object-cover" />
+                        <button type="button"
+                          onClick={() => removeGalleryImage(idx)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Features */}
+              {/* Features Section */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Features</label>
-                <div className="space-y-2">
-                  {form.features.map((f, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input value={f} onChange={e => handleFeatureChange(i, e.target.value)}
-                        className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={`Feature ${i + 1}`} />
-                      {form.features.length > 1 &&
-                        <button type="button" onClick={() => removeFeature(i)} className="text-red-500 hover:text-red-700 p-2"><X size={16} /></button>}
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={addFeature} className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Key Features</label>
+                {form.features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={feature}
+                      onChange={e => handleFeatureChange(index, e.target.value)}
+                      placeholder={`Feature ${index + 1}`}
+                      className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {form.features.length > 1 && (
+                      <button type="button" onClick={() => removeFeature(index)} className="text-red-500 hover:text-red-700 p-2">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button type="button" onClick={addFeature} className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1 mt-1">
                   <Plus size={14} /> Add Feature
                 </button>
               </div>
 
-              {/* Specs */}
+              {/* Specifications Section */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Specifications</label>
-                <div className="space-y-2">
-                  {form.specs.map((s, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input value={s.key} onChange={e => handleSpecChange(i, 'key', e.target.value)}
-                        className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Key (e.g. Weight)" />
-                      <input value={s.value} onChange={e => handleSpecChange(i, 'value', e.target.value)}
-                        className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Value (e.g. 1.2kg)" />
-                      {form.specs.length > 1 &&
-                        <button type="button" onClick={() => removeSpec(i)} className="text-red-500 hover:text-red-700 p-2"><X size={16} /></button>}
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={addSpec} className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                  <Plus size={14} /> Add Spec
+                {form.specs.map((spec, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={spec.key}
+                      onChange={e => handleSpecChange(index, 'key', e.target.value)}
+                      placeholder="Key (e.g. Processor)"
+                      className="w-1/3 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      value={spec.value}
+                      onChange={e => handleSpecChange(index, 'value', e.target.value)}
+                      placeholder="Value (e.g. Intel i7)"
+                      className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {form.specs.length > 1 && (
+                      <button type="button" onClick={() => removeSpec(index)} className="text-red-500 hover:text-red-700 p-2">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button type="button" onClick={addSpec} className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1 mt-1">
+                  <Plus size={14} /> Add Specification
                 </button>
               </div>
 
             </div>
 
-            {/* FOOTER */}
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 sticky bottom-0 bg-white">
-              <button onClick={resetModal} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-xl">Cancel</button>
-              <button onClick={handleSave} disabled={saving || !form.name || !form.short_desc}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-xl text-sm flex items-center gap-2">
-                {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
-                {saving ? 'Saving...' : editingProduct ? 'Save Changes' : 'Add Product'}
+            {/* Modal Footer Actions */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 sticky bottom-0 bg-white z-10">
+              <button type="button" onClick={resetModal} className="px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={handleSave}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                {editingProduct ? 'Update Product' : 'Save Product'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* DELETE CONFIRM MODAL */}
-      {/* DELETE CATEGORY CONFIRM MODAL */}
-      {deletingCategoryId !== null && (() => {
-        const cat = categories.find(c => c.cat_id === deletingCategoryId)
-        if (!cat) return null
-        return (
-          <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-              <h3 className="text-base font-bold text-gray-900 mb-1">Delete Category?</h3>
-              <p className="text-sm text-gray-500 mb-5">
-                Delete <span className="font-semibold text-gray-700">"{cat.name}"</span>? Categories with products attached cannot be deleted.
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button onClick={() => setDeletingCategoryId(null)}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button
-                  onClick={async () => {
-                    try {
-                      await deleteCategory(cat.cat_id)
-                      setCategories(prev => prev.filter(c => c.cat_id !== cat.cat_id))
-                      if (String(form.cat_id) === String(cat.cat_id)) setForm(prev => ({ ...prev, cat_id: '' }))
-                    } catch (err: any) {
-                      alert(err?.response?.data?.message || 'Cannot delete this category')
-                    } finally {
-                      setDeletingCategoryId(null)
-                    }
-                  }}
-                  className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* DELETE CONFIRM MODAL */}
-      {deleteId !== null && (
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteId && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Product?</h3>
-            <p className="text-sm text-gray-500 mb-6">This action cannot be undone.</p>
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button onClick={() => handleDelete(deleteId)} className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold">Delete</button>
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={20} />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Delete Product</h3>
+            <p className="text-sm text-gray-500 mb-6">Are you sure you want to delete this product? This action cannot be undone.</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button onClick={() => handleDelete(deleteId)} className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700">
+                Delete
+              </button>
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ type Announcement = {
 const emptyForm = { title: '', message: '', is_active: false }
 
 const Toast = ({ message, type }: { message: string; type: 'success' | 'error' }) => (
-  <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold ${type === 'success' ? 'bg-teal-600 text-white' : 'bg-red-500 text-white'}`}>
+  <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold transition-all ${type === 'success' ? 'bg-teal-600 text-white' : 'bg-red-500 text-white'}`}>
     {type === 'success' ? <CheckCircle size={16} /> : <XCircle size={16} />}
     {message}
   </div>
@@ -124,8 +124,8 @@ const AdminAnnouncements = () => {
   }
 
   if (loading) return (
-    <div className="flex-1 flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    <div className="flex-1 flex items-center justify-center min-h-screen bg-gray-50">
+      <Loader2 size={28} className="animate-spin text-teal-500" />
     </div>
   )
 
@@ -134,29 +134,27 @@ const AdminAnnouncements = () => {
       {toast && <Toast message={toast.message} type={toast.type} />}
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-100 px-6 lg:px-8 py-5 flex items-center justify-between shadow-sm">
         <div>
-          <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-            <span>Home</span><span>/</span>
-            <span className="text-gray-700 font-medium">Announcements</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
+          <p className="text-gray-500 text-base mt-1">Manage scrolling marquee alerts for your website.</p>
         </div>
         <button
           onClick={openCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+          className="flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl text-sm transition-colors bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
         >
-          <Plus size={16} /> New Announcement
+          <Plus size={17} />
+          New Announcement
         </button>
       </div>
 
-      <div className="p-8 max-w-4xl mx-auto">
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
 
         {/* Info banner */}
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3 mb-6">
-          <Megaphone size={18} className="text-blue-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-blue-700">
-            Only <span className="font-semibold">one announcement</span> can be active at a time.
+        <div className="bg-teal-50 border border-teal-100 rounded-2xl p-4 flex items-start gap-3 mb-6 shadow-sm">
+          <Megaphone size={18} className="text-teal-600 mt-0.5 shrink-0" />
+          <p className="text-sm text-teal-900 font-medium leading-relaxed">
+            Only <span className="font-bold">one announcement</span> can be active at a time.
             When active, it shows as a scrolling ticker on the customer-facing website.
             Activating a new one automatically deactivates the previous one.
           </p>
@@ -164,51 +162,51 @@ const AdminAnnouncements = () => {
 
         {/* Announcement list */}
         {announcements.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
-            <Megaphone size={32} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">No announcements yet.</p>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 flex flex-col items-center justify-center text-center">
+            <Megaphone size={36} className="text-gray-300 mb-3" />
+            <p className="text-gray-500 text-base font-medium">No announcements yet.</p>
             <button
               onClick={openCreate}
-              className="mt-4 text-blue-600 text-sm font-semibold hover:underline"
+              className="mt-3 text-teal-600 text-sm font-semibold hover:underline"
             >
               Create your first announcement →
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {announcements.map(a => (
               <div
                 key={a.announcement_id}
-                className={`bg-white rounded-2xl border shadow-sm p-5 transition-all ${a.is_active ? 'border-green-300 ring-2 ring-green-100' : 'border-gray-100'}`}
+                className={`bg-white rounded-2xl border shadow-sm p-5 transition-all duration-200 ${a.is_active ? 'border-teal-300 ring-2 ring-teal-50' : 'border-gray-100 hover:shadow-md'}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2.5 mb-1.5">
                       {a.title && (
-                        <p className="font-semibold text-gray-900 text-sm">{a.title}</p>
+                        <p className="font-bold text-gray-900 text-base">{a.title}</p>
                       )}
                       {a.is_active && (
-                        <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-bold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">
                           LIVE
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 leading-relaxed">{a.message}</p>
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-sm text-gray-600 font-medium leading-relaxed">{a.message}</p>
+                    <p className="text-xs text-gray-400 font-medium mt-2.5">
                       Created {new Date(a.created_at).toLocaleDateString('en-IN', {
                         day: '2-digit', month: 'short', year: 'numeric'
                       })}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2.5 shrink-0">
                     {/* Toggle active */}
                     <button
                       onClick={() => handleToggle(a)}
                       title={a.is_active ? 'Deactivate' : 'Set as Live'}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
                         a.is_active
-                          ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                          ? 'border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100'
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
@@ -216,15 +214,15 @@ const AdminAnnouncements = () => {
                     </button>
                     <button
                       onClick={() => openEdit(a)}
-                      className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors"
                     >
-                      <Edit size={15} />
+                      <Edit size={17} />
                     </button>
                     <button
                       onClick={() => setDeleteId(a.announcement_id)}
-                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={17} />
                     </button>
                   </div>
                 </div>
@@ -237,19 +235,19 @@ const AdminAnnouncements = () => {
       {/* CREATE / EDIT MODAL */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <h2 className="text-lg font-bold text-gray-900">
                 {editing ? 'Edit Announcement' : 'New Announcement'}
               </h2>
-              <button onClick={resetModal} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X size={18} />
+              <button onClick={resetModal} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Title <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <input
@@ -257,32 +255,32 @@ const AdminAnnouncements = () => {
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Festival Offer, New Product Launch"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-gray-800"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={form.message}
                   onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
                   rows={3}
                   placeholder="This message will scroll across the top of the website..."
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-gray-800 resize-none"
                 />
-                <p className="text-xs text-gray-400 mt-1">{form.message.length} characters</p>
+                <p className="text-xs text-gray-400 font-medium mt-1.5">{form.message.length} characters</p>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Set as Live</p>
-                  <p className="text-xs text-gray-400">Show this on the website immediately after saving</p>
+                  <p className="text-sm font-bold text-gray-900">Set as Live</p>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">Show this on the website immediately after saving</p>
                 </div>
                 <div
                   onClick={() => setForm(f => ({ ...f, is_active: !f.is_active }))}
-                  className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${form.is_active ? 'bg-green-500' : 'bg-gray-300'}`}
+                  className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${form.is_active ? 'bg-teal-600' : 'bg-gray-300'}`}
                 >
                   <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow transition-all ${form.is_active ? 'right-1' : 'left-1'}`} />
                 </div>
@@ -292,16 +290,16 @@ const AdminAnnouncements = () => {
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
               <button
                 onClick={resetModal}
-                className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50"
+                className="px-5 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.message.trim()}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-xl text-sm flex items-center gap-2"
+                className="bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors shadow-sm"
               >
-                {saving && <Loader2 size={14} className="animate-spin" />}
+                {saving && <Loader2 size={16} className="animate-spin" />}
                 {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create'}
               </button>
             </div>
@@ -314,17 +312,17 @@ const AdminAnnouncements = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Announcement?</h3>
-            <p className="text-sm text-gray-500 mb-6">This action cannot be undone.</p>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">This action cannot be undone.</p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+                className="px-4.5 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteId)}
-                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold"
+                className="px-4.5 py-2.5 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm"
               >
                 Delete
               </button>

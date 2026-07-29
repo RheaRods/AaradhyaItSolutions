@@ -35,28 +35,42 @@ type AnnouncementData = {
 }
 
 const AnnouncementTicker = ({ announcement }: { announcement: AnnouncementData }) => {
-  const text = announcement.title
-    ? `${announcement.title}: ${announcement.message}`
-    : announcement.message
-
   return (
-    <div className="bg-blue-600 text-white py-2 overflow-hidden relative">
-      {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-blue-600 to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-blue-600 to-transparent z-10 pointer-events-none" />
+    <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white py-3 overflow-hidden relative border-b border-blue-400/30 shadow-xs antialiased">
+      {/* Soft gradient fade on the sides for a seamless loop */}
+      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-blue-700 via-blue-700/80 to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-blue-700 via-blue-700/80 to-transparent z-10 pointer-events-none" />
 
-      <div className="flex items-center gap-3 animate-ticker whitespace-nowrap">
-        {/* Repeat the text so the loop looks seamless */}
+      <div className="flex items-center gap-4 animate-ticker whitespace-nowrap">
+        {/* Repeat content 4 times for a continuous loop */}
         {[...Array(4)].map((_, i) => (
-          <span key={i} className="text-sm font-medium px-8 flex items-center gap-2">
-            <span className="text-blue-200">📢</span>
-            {text}
-            <span className="text-blue-300 mx-4">•</span>
-          </span>
+          <div key={i} className="px-6 flex items-center gap-3">
+            {/* Pulsing Announcement Badge */}
+            <span className="inline-flex items-center gap-1.5 bg-blue-900/40 border border-white/20 text-yellow-300 text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 shadow-xs">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400"></span>
+              </span>
+              Notice
+            </span>
+
+            {/* Title & Message */}
+            <div className="flex items-center gap-2 text-sm sm:text-base font-medium">
+              {announcement.title && (
+                <span className="text-white font-bold tracking-wide">
+                  {announcement.title}:
+                </span>
+              )}
+              <span className="text-blue-50 font-medium">{announcement.message}</span>
+            </div>
+
+            {/* Separator */}
+            <span className="text-blue-300/60 mx-4 text-xs">•</span>
+          </div>
         ))}
       </div>
 
-      {/* Ticker animation — injected as a style tag so we don't need Tailwind JIT */}
+      {/* Smooth CSS Ticker Animation */}
       <style>{`
         @keyframes ticker {
           0%   { transform: translateX(0); }
@@ -64,7 +78,7 @@ const AnnouncementTicker = ({ announcement }: { announcement: AnnouncementData }
         }
         .animate-ticker {
           display: inline-flex;
-          animation: ticker 28s linear infinite;
+          animation: ticker 32s linear infinite;
         }
         .animate-ticker:hover {
           animation-play-state: paused;
@@ -88,7 +102,7 @@ const PublicLayout = () => {
       .catch(() => setMaintenance(false))
       .finally(() => setChecking(false))
 
-    // Fetch active announcement (independent — doesn't block render)
+    // Fetch active announcement
     getActiveAnnouncement().then(data => setAnnouncement(data))
   }, [])
 

@@ -5,16 +5,16 @@ import { getInquiries, updateInquiryStatus, deleteInquiry } from '../../services
 const tabs = ['All', 'New', 'Seen', 'Replied', 'Resolved']
 
 const statusColors: Record<string, string> = {
-  New: 'bg-blue-100 text-blue-700',
-  Seen: 'bg-yellow-100 text-yellow-700',
-  Replied: 'bg-green-100 text-green-700',
-  Resolved: 'bg-gray-100 text-gray-600',
+  New: 'bg-blue-100 text-blue-800',
+  Seen: 'bg-yellow-100 text-yellow-800',
+  Replied: 'bg-green-100 text-green-800',
+  Resolved: 'bg-gray-100 text-gray-700',
 }
 
 const methodColors: Record<string, string> = {
-  WhatsApp: 'bg-green-100 text-green-700',
-  Phone: 'bg-blue-100 text-blue-700',
-  Website: 'bg-purple-100 text-purple-700',
+  WhatsApp: 'bg-green-100 text-green-800',
+  Phone: 'bg-blue-100 text-blue-800',
+  Website: 'bg-purple-100 text-purple-800',
 }
 
 const AdminInquiries = () => {
@@ -124,7 +124,7 @@ const AdminInquiries = () => {
   }
 
   if (loading) return (
-    <div className="flex-1 flex items-center justify-center">
+    <div className="flex-1 flex items-center justify-center min-h-screen">
       <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )
@@ -136,46 +136,46 @@ const AdminInquiries = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Inquiry Logs</h1>
-          <p className="text-gray-500 text-sm mt-1">All customer inquiries in one place.</p>
+          <p className="text-gray-500 text-base mt-1">All customer inquiries in one place.</p>
         </div>
         <button
           onClick={handleExportCSV}
-          className="flex items-center gap-2 border border-gray-200 bg-white text-gray-600 text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 border border-gray-200 bg-white text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
         >
-          <Filter size={15} />
+          <Filter size={17} />
           Export CSV
         </button>
       </div>
 
       {/* Search */}
       <div className="relative mb-5">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder="Search inquiries..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-medium text-gray-800 placeholder-gray-400"
         />
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-2 mb-6 scrollbar-hide">
         {tabs.map(tab => (
           <button
             key={tab}
             onClick={() => { setActiveTab(tab); setSelected(null) }}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`shrink-0 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
               activeTab === tab
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-white border border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600'
             }`}
           >
             {tab}
             {tab === 'All' ? (
-              <span className="ml-1.5 text-xs opacity-70">({inquiries.length})</span>
+              <span className="ml-1.5 text-xs opacity-80">({inquiries.length})</span>
             ) : (
-              <span className="ml-1.5 text-xs opacity-70">
+              <span className="ml-1.5 text-xs opacity-80">
                 ({inquiries.filter(i => i.status === tab).length})
               </span>
             )}
@@ -187,11 +187,11 @@ const AdminInquiries = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Inquiry List */}
-        <div className="lg:col-span-2 space-y-3">
+        <div className="lg:col-span-2 space-y-3.5">
           {filtered.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-              <MessageSquare size={28} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">No inquiries found.</p>
+            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+              <MessageSquare size={32} className="text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 text-base font-medium">No inquiries found.</p>
             </div>
           ) : (
             filtered.map(inquiry => (
@@ -202,16 +202,16 @@ const AdminInquiries = () => {
                   selected === inquiry.id ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-100'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-start justify-between gap-3 mb-2.5">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm truncate">{inquiry.product}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{inquiry.id} · {inquiry.time}</p>
+                    <p className="font-bold text-gray-900 text-base truncate">{inquiry.product}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 font-medium">{inquiry.id} · {inquiry.time}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${methodColors[inquiry.method] || 'bg-gray-100'}`}>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${methodColors[inquiry.method] || 'bg-gray-100'}`}>
                       {inquiry.method}
                     </span>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[inquiry.status] || 'bg-gray-100'}`}>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColors[inquiry.status] || 'bg-gray-100'}`}>
                       {inquiry.status}
                     </span>
                   </div>
@@ -226,82 +226,82 @@ const AdminInquiries = () => {
         <div className="hidden lg:block">
           {selectedInquiry ? (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-6">
-              <h3 className="font-bold text-gray-900 mb-1">{selectedInquiry.product}</h3>
-              <p className="text-xs text-gray-400 mb-5">{selectedInquiry.id} · {selectedInquiry.time}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">{selectedInquiry.product}</h3>
+              <p className="text-xs text-gray-500 mb-5 font-medium">{selectedInquiry.id} · {selectedInquiry.time}</p>
 
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3.5 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Status</span>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[selectedInquiry.status] || 'bg-gray-100'}`}>
+                  <span className="text-gray-500 font-medium">Status</span>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColors[selectedInquiry.status] || 'bg-gray-100'}`}>
                     {selectedInquiry.status}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Method</span>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${methodColors[selectedInquiry.method] || 'bg-gray-100'}`}>
+                  <span className="text-gray-500 font-medium">Method</span>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${methodColors[selectedInquiry.method] || 'bg-gray-100'}`}>
                     {selectedInquiry.method}
                   </span>
                 </div>
                 {selectedInquiry.full_name && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Name</span>
-                    <span className="text-gray-800 font-medium">{selectedInquiry.full_name}</span>
+                    <span className="text-gray-500 font-medium">Name</span>
+                    <span className="text-gray-900 font-semibold">{selectedInquiry.full_name}</span>
                   </div>
                 )}
                 {selectedInquiry.phone_no && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Phone</span>
-                    <span className="text-gray-800 font-medium">{selectedInquiry.phone_no}</span>
+                    <span className="text-gray-500 font-medium">Phone</span>
+                    <span className="text-gray-900 font-semibold">{selectedInquiry.phone_no}</span>
                   </div>
                 )}
                 {selectedInquiry.business_name && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Business</span>
-                    <span className="text-gray-800 font-medium">{selectedInquiry.business_name}</span>
+                    <span className="text-gray-500 font-medium">Business</span>
+                    <span className="text-gray-900 font-semibold">{selectedInquiry.business_name}</span>
                   </div>
                 )}
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Message</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Message</p>
                 <p className="text-sm text-gray-700 leading-relaxed">{selectedInquiry.message}</p>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <button
                   onClick={() => handleWhatsApp(selectedInquiry)}
-                  className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm"
                 >
                   Reply on WhatsApp
                 </button>
                 <button
                   onClick={() => handleCall(selectedInquiry)}
-                  className="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 text-sm font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   Call Customer
                 </button>
                 {selectedInquiry.status !== 'Resolved' && (
                   <button
                     onClick={() => handleResolve(selectedInquiry)}
-                    className="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-semibold py-2.5 rounded-xl transition-colors"
+                    className="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-semibold py-3 rounded-xl transition-colors"
                   >
-                    <CheckCircle size={15} />
+                    <CheckCircle size={17} />
                     Mark as Resolved
                   </button>
                 )}
                 <button
                   onClick={() => handleDelete(selectedInquiry.id)}
-                  className="flex items-center justify-center gap-2 w-full bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold py-2.5 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 w-full bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold py-3 rounded-xl transition-colors"
                 >
-                  <Trash2 size={15} />
+                  <Trash2 size={17} />
                   Delete Inquiry
                 </button>
               </div>
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center sticky top-6">
-              <MessageSquare size={28} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-400">Select an inquiry to view details.</p>
+              <MessageSquare size={32} className="text-gray-300 mx-auto mb-3" />
+              <p className="text-sm text-gray-500 font-medium">Select an inquiry to view details.</p>
             </div>
           )}
         </div>
