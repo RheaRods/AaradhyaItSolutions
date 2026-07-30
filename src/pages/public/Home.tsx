@@ -131,15 +131,15 @@ const Home = () => {
               {/* Animated Headline */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-6 animate-fade-in-up">
                 <span className="block transform transition-all duration-700 hover:translate-x-1">
-                  Powering Retail &amp;{' '}
-                </span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-200 to-white bg-[length:200%_auto] animate-gradient inline-block">
-                  Pharma Businesses
-                </span>{' '}
-                <span className="block transform transition-all duration-750 delay-100">
-                  Across Goa
-                </span>
-              </h1>
+    Powering FMCG (Fast Moving Consumer Goods) &amp;{' '}
+  </span>
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-200 to-white bg-[length:200%_auto] animate-gradient inline-block">
+    Pharma Businesses
+  </span>{' '}
+  <span className="block transform transition-all duration-750 delay-100 mt-2 sm:mt-0">
+    Across Goa &amp; North Kannada
+  </span>
+</h1>
 
               <p className="text-blue-100 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl opacity-90 animate-fade-in">
                 Software and hardware solutions built for the way you work. 

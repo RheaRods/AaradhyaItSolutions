@@ -37,19 +37,25 @@ const Navbar = () => {
 
             {/* Logo */}
             <Link 
-              to="/" 
-              className="flex items-center gap-3 group transition-transform duration-300 hover:scale-[1.03]"
-            >
-              <img
-                src={info.logoPath || "https://larjotmzhxdmqzktyafh.supabase.co/storage/v1/object/public/company-assets/Aaradhya_logo.png"}
-                alt="Aaradhya IT"
-                className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
-              />
-              <span className="font-bold text-2xl leading-tight tracking-tight">
-                <span className="text-red-600">Aaradhya</span>{' '}
-                <span className="text-blue-700">IT Solution</span>
-              </span>
-            </Link>
+  to="/" 
+  className="flex items-center gap-3 group transition-transform duration-300 hover:scale-[1.03]"
+>
+  <img
+    src={info.logoPath || "https://larjotmzhxdmqzktyafh.supabase.co/storage/v1/object/public/company-assets/Aaradhya_logo.png"}
+    alt="Aaradhya IT"
+    className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
+  />
+  {/* This new div stacks the name and the tagline vertically next to the logo */}
+  <div className="flex flex-col justify-center">
+    <span className="font-bold text-2xl leading-none tracking-tight">
+      <span className="text-red-600">Aaradhya</span>{' '}
+      <span className="text-blue-700">IT Solution</span>
+    </span>
+    <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.08em] text-gray-500 font-semibold mt-0.5 whitespace-nowrap">
+      Complete Solution For Your Business
+    </span>
+  </div>
+</Link>
 
             {/* Nav Links */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
